@@ -1,5 +1,4 @@
 #+TITLE: CSE 2231 Homework
-#+AUTHOR: Zhenyu Liu
 #+OPTIONS: toc:nil num:nil
 #+STARTUP: indent
 #+STARTUP: overview
@@ -1590,7 +1589,6 @@ public abstract class SequenceTest {
 
 * Homework 16 Quicksort
 
-- Zhenyu Liu
 - Session 12:40
 
 #+begin_src java -r -n 
@@ -1682,7 +1680,6 @@ public abstract class SequenceTest {
 
 * Homework 17 Heapsort
 
-- Zhenyu Liu 
 - Session: 12:40
 
 #+NAME:satisfiesHeapOrderin
@@ -1725,7 +1722,6 @@ public abstract class SequenceTest {
 
 * Homework 18 Stack Implementation with Singly-Linked List
 
-- Zhenyu Liu 
 - Session: 12 : 40
 
 #+begin_src java -r -n
@@ -1884,7 +1880,6 @@ public abstract class SequenceTest {
 
 * Homework 19 List Implementation with Singly-Linked List and Two Smart Nodes
 
-- Zhenyu Liu 
 - Session  12 : 40
 
 #+begin_src java -r -n
@@ -1921,7 +1916,6 @@ public abstract class SequenceTest {
 
 * Homework 21 Tree and Recursion
 
-- Zhenyu Liu
 - Session 12 : 40
 
 #+NAME: size in recursive
@@ -2060,7 +2054,6 @@ public static <T> int size(Tree<T> t) {
 
 * Homework 22 Statement and Recursion I
 
-- Zhenyu Liu
 - Session: 12 : 40
 
 #+NAME: countOfPrimitiveCalls
@@ -2180,7 +2173,6 @@ public static <T> int size(Tree<T> t) {
 
 * Homework 23  Statement and Recursion II
 
-- Zhenyu Liu
 - Session 12 : 40
 
 #+NAME: simplifyIfEls
@@ -2298,7 +2290,6 @@ public static <T> int size(Tree<T> t) {
 
 * Homework 24 Statement and Recursion III
 
-- Zhenyu Liu
   - Session 12:40
 #+NAME: prettyPrint
 #+begin_src java -r -n 
@@ -2551,7 +2542,6 @@ public static <T> int size(Tree<T> t) {
 
 * Homework 26 Tokenizer
 
-- Zhenyu Liu
 - 12 : 40
 
 #+NAME: Tokenizer
@@ -2677,7 +2667,6 @@ public static <T> int size(Tree<T> t) {
 
 * Homework 28 Evaluation of Arithmetic Expressions (Recursive Descent Parser)
 
-- Zhenyu Liu
 
 #+NAME:ExpressionEvaluator
 #+begin_src java -r -n 
@@ -2686,7 +2675,6 @@ public static <T> int size(Tree<T> t) {
  * This program calculates the value of an expression consisting of numbers,
  * arithmetic operators, and parentheses.
  *
- * @author Zhenyu Liu
  *
  */
 public final class ExpressionEvaluator {
@@ -2895,7 +2883,6 @@ public final class ExpressionEvaluator {
 
 * Homework 29 Evaluation of Boolean Expressions (Recursive Descent Parser)
 
-- Zhenyu Liu
 
 #+NAME:valueOfBoolExpr
 #+begin_src java -r -n
@@ -2966,7 +2953,6 @@ public final class ExpressionEvaluator {
 
 * Homework 31 Statement and Recursion IV
 
-- Zhenyu Liu
 
 #+NAME: generateCodeForStatement
 #+BEGIN_src java -r -n 
@@ -3084,7 +3070,6 @@ public final class ExpressionEvaluator {
 
 * Homework 32 WaitingLine Family Interface Design
 
-- Zhenyu Liu
 
 #+NAME: WaitingLineKernel:
 #+BEGIN_src java -r -n
@@ -3233,7 +3218,6 @@ public interface WaitingLine<T> extends WaitingLineKernel<T> {
 
 * Homework 33 WaitingLine Family Class Implementation
 
-- Zhenyu Liu
 
 #+NAME:WaitingLingSecondary
 #+begin_src java -r -n
@@ -3386,7 +3370,6 @@ public interface WaitingLine<T> extends WaitingLineKernel<T> {
 
 * Homework 34 The Java Collections Framework I
 
-- Zhenyu Liu
 
 ** Whimsical Toys Inc (WTI) needs to record the names of all its employees. Every month, an employee will be chosen at random from these records to receive a free toy.
 
@@ -3414,7 +3397,6 @@ public interface WaitingLine<T> extends WaitingLineKernel<T> {
 
 * Homework 35 The Java Collections Framework II
 
-- Zhenyu Liu 
 
 #+begin_src java -r -n
 
@@ -3500,7 +3482,6 @@ public interface WaitingLine<T> extends WaitingLineKernel<T> {
 
 * Homework 36 Java File I/O 
 
-- Zhenyu Liu
 
 #+begin_src java -r -n
 
@@ -3599,13 +3580,11 @@ public interface WaitingLine<T> extends WaitingLineKernel<T> {
         }
     }
 
-
-#+
+#+end_src 
 
 
 * Homework 37 Java Class/Static Data Members – EmailAccount 
 
-- Zhenyu Liu
 
 #+begin_src java -r -n 
 
@@ -3696,7 +3675,7 @@ public final class EmailAccount1 implements EmailAccount {
 
 * Review 
 
-// next word separator
+** next word separator
 
 
 #+begin_src java
