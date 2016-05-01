@@ -1,0 +1,48 @@
+
+#+TITLE: Note for Thinking in Java
+#+AUTHOR: ZHENYU LIU
+#+OPTIONS: H:2 num:nil  \n:nil @:t ::t |:t ^:{} _:{} *:t TeX:t LaTeX:t
+
+
+<<top>>
+* Introduction to Objects
+
+** The Progress of Abstraction 
+
+*** Characteristics for OOP:					     :object:
+
+1. Everything is an object. 
+   - you can make any conceptual component in the problem and represent it as an object in your program. 
+2. A program is a bunch of objects telling each other waht to do by sending messages. 
+3. Each object has its own memory made up of other objects. 
+   - create a new kind of object by making a package containing existing objects. 
+4. Every object has a type. 
+5. All objects of a particular type can receive the same messages. 
+
+*** An object has an interface			      :types:class:interface:
+
++ Machine model and model of problem
+  - /solution space/: which is the place where you're implementing that solution, such as computer. 
+  - /problem space/: which is place where the problem exist, such as a business. 
+
+- Objects that are identical except for their state during a program's exectutin are grouped together into "classes of objects", and that's where the keyword /*class*/ came from.
+- creating _abstract data types (classes)_ is a fundamental concept in OOP. 
+- So, although what we really do in object-oriented programming is create new data types, virtually all object oriented programming languages use the "class" keyword, when you see the word "type" think "class" and vice versa. 
+- a class describes a set of objects that have identical characteristics(data elements) and behaviors (functionality), a class is really a data type. Once the class is established, you can make as many objects of that class as yu like. 
+
+- Any program is a simulation of the system you're designing
+
+- the /*interface*/ determines the requests that you can make for a particular object. 
+
+#+begin_src java
+Lignt it = new Light();
+it.on();
+#+end_src  
+- the example for relationship between types, obejects, interface: the name of the type is /*Light*/, the name of this particular Light is /*it*/, and the requests that we make of the /*Light*/ object are to turn it on. you create a Light object by defining a "reference" (/*it*/) for that object and calling /*new*/ to request a new object for that type. To send message to the object, you state the name of the object and connect it to the message request with a period (dot). 
+
+*** An object provides serivices
+- the best way think about objects is as "serivice providers". it's a great simplifying tool. 
+- High cohesion is a fundamental quality of software design.
+  - it means various aspects of a software component (no matter an object or methods or library of objects) fit together.
+  - one problem people have when designing objects is cramming too much functionality into one object. 
+
