@@ -1,0 +1,3714 @@
+#+TITLE: CSE 2231 Homework
+#+AUTHOR: Zhenyu Liu
+#+OPTIONS: toc:nil num:nil
+#+STARTUP: indent
+#+STARTUP: overview
+
+
+
+* Homework 1: Reading Formal Contract Specifications
+
+#+begin_src java -n -r
+/**
+ * No informal description here for obvious reasons...
+ * 
+ * @replaces s2
+ * @requires |s1| >= 1
+ * @ensures <pre>
+ * |s2| = |s1| - 1  and
+ *  for all i, j: integ
+er, a, b: string of integer
+ *      where (s1 = a * <i> * <j> * b)
+ *    (there exists c, d: string of integer
+ *       (|c| = |a|  and
+ *        s2 = c * <(i+j)/2> * d))
+ * </pre>
+ */
+public static void smooth(Sequence<Integer> s1, Sequence<Integer> s2) {...}
+
+#+end_src 
+
+**  Suppose seq1 = <2,4,6>, seq2 = < -5, 12 >. What are the values of seq1 and seq2 after the call smooth(seq1, seq2)? 
+
+# 这个作业与ppt中的code一样，只要把几种情况分开做，得到不同组合的 i 和 j 然后除以2就得到一个新的组合了
+
+| s1 | <2,4,6> |       |
+|----+---------+-------|
+| a  | < >     | < 2 > |
+| i  | 2       | 4     |
+| j  | 4       | 6     |
+| b  | <6 >    | < >   |
+| c  | < >     | <?>   |
+| d  | <?>     | < >   |
+| s2 | <3,?>   | <?,5> |
+
+seq1 = < 2,4,6 > ; seq2 = <3,5>
+
+** Suppose seq1 = < 7 >, seq2 = < 13, 17, 11 >. What are the values of seq1 and seq2 after the call smooth(seq1, seq2)? 
+
+because s1 = <7>, but in order to make the ensure clause true, s2 must be s2 = <>; in this case there are no values of i, j, a and b makes the s1 = a*<i>*<j>*b become true. 
+
+** Suppose seq1 = < >, seq2 = < >. What are the values of seq1 and seq2 after the call smooth(seq1, seq2)? 
+This should return a error, because the requires is |s1| >= 1, when seq1 = < >, the |s1| = 0;
+
+** Explain informally, but precisely, what the specs of smooth say about the method's behavior. In other words, explain in English what smooth is supposed to do. 
+
+Based on the result in the homework, this method is supposed to calculate the average in each pair of integers in s1 and update the result to s2. 
+
+
+* Homework 2: Testing Sequence Smooth 
+
+#+begin_src java -r -n
+  /**
+   ,* Smooths a given {@code Sequence<Integer>}.
+   ,* 
+   ,* @param s1
+   ,*            the sequence to smooth
+   ,* @param s2
+   ,*            the resulting sequence 
+   ,* @replaces s2
+   ,* @requires |s1| >= 1
+   ,* @ensures <pre>
+   ,* |s2| = |s1| - 1  and
+   ,*  for all i, j: integer, a, b: string of integer
+   ,*      where (s1 = a * <i> * <j> * b)
+   ,*    (there exists c, d: string of integer
+   ,*       (|c| = |a|  and
+   ,*        s2 = c * <(i+j)/2> * d))
+   ,* </pre>
+   ,*/
+  public static void smooth(Sequence<Integer> s1, Sequence<Integer> s2) {...}
+
+#+end_src
+
+#+begin_src java -r -n
+   /**
+       ,* Test smooth with s1 = <2, 4, 6> and s2 = <-5, 12>.
+       ,*/
+      @Test
+      public void test1() {
+          /*
+           ,* Set up variables and call method under test
+           ,*/
+          Sequence<Integer> seq1 = this.createFromArgs(2, 4, 6);
+          Sequence<Integer> expectedSeq1 = this.createFromArgs(2, 4, 6);
+          Sequence<Integer> seq2 = this.createFromArgs(-5, 12);
+          Sequence<Integer> expectedSeq2 = this.createFromArgs(3, 5);
+          SequenceSmooth.smooth(seq1, seq2);
+          /*
+           ,* Assert that values of variables match expectations
+           ,*/
+          assertEquals(expectedSeq1, seq1);
+          assertEquals(expectedSeq2, seq2);
+      }
+
+      /**
+       ,* Test smooth with s1 = <7> and s2 = <13, 17, 11>.
+       ,*/
+      @Test
+      public void test2() {
+          /*
+           ,* Set up variables and call method under test
+           ,*/
+          Sequence<Integer> seq1 = this.createFromArgs(7);
+          Sequence<Integer> expectedSeq1 = this.createFromArgs(7);
+          Sequence<Integer> seq2 = this.createFromArgs(13, 17, 11);
+          Sequence<Integer> expectedSeq2 = this.createFromArgs();
+          SequenceSmooth.smooth(seq1, seq2);
+          /*
+           ,* Assert that values of variables match expectations
+           ,*/
+          assertEquals(expectedSeq1, seq1);
+          assertEquals(expectedSeq2, seq2);
+      }
+
+      /**
+       ,* Test smooth with s1 = <7,23> and s2 = <1,2,3>.
+       ,*/
+      @Test
+      public void test3() {
+          /*
+           ,* Set up variables and call method under test
+           ,*/
+          Sequence<Integer> seq1 = this.createFromArgs(7, 23);
+          Sequence<Integer> expectedSeq1 = this.createFromArgs(7, 23);
+          Sequence<Integer> seq2 = this.createFromArgs(1, 2, 3);
+          Sequence<Integer> expectedSeq2 = this.createFromArgs(15);
+          SequenceSmooth.smooth(seq1, seq2);
+          /*
+           ,* Assert that values of variables match expectations
+           ,*/
+          assertEquals(expectedSeq1, seq1);
+          assertEquals(expectedSeq2, seq2);
+      }
+
+      /**
+       ,* Test smooth with s1 = <7,23,2> and s2 = <1,2,3>.
+       ,*/
+      @Test
+      public void test4() {
+          /*
+           ,* Set up variables and call method under test
+           ,*/
+          Sequence<Integer> seq1 = this.createFromArgs(7, 23, 2);
+          Sequence<Integer> expectedSeq1 = this.createFromArgs(7, 23, 2);
+          Sequence<Integer> seq2 = this.createFromArgs(1, 2, 3);
+          Sequence<Integer> expectedSeq2 = this.createFromArgs(15, 12);
+          SequenceSmooth.smooth(seq1, seq2);
+          /*
+           ,* Assert that values of variables match expectations
+           ,*/
+          assertEquals(expectedSeq1, seq1);
+          assertEquals(expectedSeq2, seq2);
+      }
+
+      /**
+       ,* Test smooth with s1 = <-7,-23,-2,-6> and s2 = <1,2,3>.
+       ,*/
+      @Test
+      public void test5() {
+          /*
+           ,* Set up variables and call method under test
+           ,*/
+          Sequence<Integer> seq1 = this.createFromArgs(-7, -23, -2, -6);
+          Sequence<Integer> expectedSeq1 = this.createFromArgs(-7, -23, -2, -6);
+          Sequence<Integer> seq2 = this.createFromArgs(1, 2, 3);
+          Sequence<Integer> expectedSeq2 = this.createFromArgs(-15, -12, -4);
+          SequenceSmooth.smooth(seq1, seq2);
+          /*
+           ,* Assert that values of variables match expectations
+           ,*/
+          assertEquals(expectedSeq1, seq1);
+          assertEquals(expectedSeq2, seq2);
+      }
+
+      /**
+       ,* Test smooth with s1 = <1073741825, 1073741825> and s2 = <>.
+       ,*/
+      @Test
+      public void test6() {
+          /*
+           ,* Set up variables and call method under test
+           ,*/
+          Sequence<Integer> seq1 = this.createFromArgs(1073741825, 1073741825);
+          Sequence<Integer> expectedSeq1 = this.createFromArgs(1073741825,
+                  1073741825);
+          Sequence<Integer> seq2 = this.createFromArgs();
+          Sequence<Integer> expectedSeq2 = this.createFromArgs(1073741825);
+          SequenceSmooth.smooth(seq1, seq2);
+          /*
+           ,* Assert that values of variables match expectations
+           ,*/
+          assertEquals(expectedSeq1, seq1);
+          assertEquals(expectedSeq2, seq2);
+      }
+
+      /**
+       ,* Test smooth with s1 = <1073741825, -1073741825> and s2 = <>.
+       ,*/
+      @Test
+      public void test7() {
+          /*
+           ,* Set up variables and call method under test
+           ,*/
+          Sequence<Integer> seq1 = this.createFromArgs(1073741825, -1073741825);
+          Sequence<Integer> expectedSeq1 = this.createFromArgs(1073741825,
+                  -1073741825);
+          Sequence<Integer> seq2 = this.createFromArgs();
+          Sequence<Integer> expectedSeq2 = this.createFromArgs(0);
+          SequenceSmooth.smooth(seq1, seq2);
+          /*
+           ,* Assert that values of variables match expectations
+           ,*/
+          assertEquals(expectedSeq1, seq1);
+          assertEquals(expectedSeq2, seq2);
+      }
+
+      /**
+       ,* Test smooth with s1 = <1073741825, -1073741825> and s2 = <>.
+       ,*/
+      @Test
+      public void test8() {
+          /*
+           ,* Set up variables and call method under test
+           ,*/
+          Sequence<Integer> seq1 = this.createFromArgs(-1073741825, 1073741825);
+          Sequence<Integer> expectedSeq1 = this.createFromArgs(-1073741825,
+                  1073741825);
+          Sequence<Integer> seq2 = this.createFromArgs();
+          Sequence<Integer> expectedSeq2 = this.createFromArgs(0);
+          SequenceSmooth.smooth(seq1, seq2);
+          /*
+           ,* Assert that values of variables match expectations
+           ,*/
+          assertEquals(expectedSeq1, seq1);
+          assertEquals(expectedSeq2, seq2);
+      }
+#+end_src
+
+
+* Homework 3: Sequence Smooth as a Function
+
+[[http://web.cse.ohio-state.edu/software/2231/web-sw2/assignments/homeworks/smooth-function.html][Link]]
+
+#+NAME: smooth return sequence in non-recursive
+#+begin_src java -n -r
+  /**
+   ,,* Smooths a given {@code Sequence<Integer>}.
+   ,,*
+   ,,* @param s1
+   ,,*            the sequence to smooth
+   ,,* @return s2
+   ,,*            the sequence with smoothed value
+   ,,* @requires |s1| >= 1
+   ,,* @ensures
+   ,,*
+   ,,*          <pre>
+   ,,* |s2| = |s1| - 1  and
+   ,,*  for all i, j: integer, a, b: string of integer
+   ,,*      where (s1 = a * <i> * <j> * b)
+   ,,*    (there exists c, d: string of integer
+   ,,*       (|c| = |a|  and
+   ,,*        s2 = c * <(i+j)/2> * d))
+   ,,*          </pre>
+   ,*/
+
+    /* 
+  
+        the loop only need to run length - 1 times to solve the value of
+        s2, but it still need to run length times in order to keep the
+        s1 same; for example s1 <7,23,2,6>; if the loop only run length
+        - 1 times, in the end the s1 will become <6,7,23,2>; so in this
+        case, we need to put 6 in the end thus we need another time to
+        make the position right, but if we do that the s2 will have a
+        extra value : (6+7) /2, so we need a condition to prevent the
+        extra value into the sequence s2, in this case we use the s2
+        length should smaller 1 than the length of s1
+  
+        ,* 注意：当s2的length等于length的时候应该停止，所以condition应该
+        是 < length-1 因为它是每次进入loop才会增加新的value
+  
+        ,*/
+
+    public static Sequence<Integer> smooth(Sequence<Integer> s1) {
+        assert s1 != null : "Violation of: s1 is not null";
+
+        assert s1.length() >= 1 : "|s1| >= 1";
+
+        // new Sequence to temporary store the value of s2
+        Sequence<Integer> s2 = s1.newInstance();
+        // original length of s1
+        int length = s1.length();
+
+        for (int i = 0; i < length; i++) {
+            int first = s1.remove(0);
+            int second = s1.remove(0);
+            s1.add(0, second);
+            s1.add(length - 1, first);
+            if (s2.length() < length - 1) {
+                s2.add(i, (int) (((long) first + (long) second) / 2));
+            }
+        }
+
+
+        return s2;
+    }
+#+end_src
+
+#+NAME: smooth return sequence in recursive
+#+begin_src java -n -r
+  /**
+   ,,* Smooths a given {@code Sequence<Integer>}.
+   ,,*
+   ,,* @param s1
+   ,,*            the sequence to smooth
+   ,,* @return s2
+   ,,*            the sequence with smoothed value
+   ,,* @requires |s1| >= 1
+   ,,* @ensures
+   ,,*
+   ,,*          <pre>
+   ,,* |s2| = |s1| - 1  and
+   ,,*  for all i, j: integer, a, b: string of integer
+   ,,*      where (s1 = a * <i> * <j> * b)
+   ,,*    (there exists c, d: string of integer
+   ,,*       (|c| = |a|  and
+   ,,*        s2 = c * <(i+j)/2> * d))
+   ,,*          </pre>
+   ,,*/
+
+
+  /*
+       这个recursive的重点在于对return的把握，主体与之前的一致，同样是同
+       时取出两个vlaue，然后把second塞回s1之后为了用recursive进入下一个
+       loop，这个是一个sequence无法直接用等于号，那么主体思想就是利用
+       sequence本身的kernelmethod－transferFrom，这样以来当我们return s2，
+       同时可以把s2代入下一个loop，所以其实是s2.transferFrom(s2)其中括号
+       中的s2是上一个loop return的，前端的是本loop新建的，这样以来就可以
+       实现在不同的recursive loop中，每次都可以update value到s2中.
+ 
+       ,* 注意: 1. 因为这个method不再update sequence s2，所以formal
+       parameter不需要有
+
+       2. 因为每次新进入一个recursive loop，s2都会* 是新建的，所以最
+       后当不满足if条件的时候会直接return < >
+
+       3. 因* 为这个method是return一个sequence，不同于其它的
+       primitive type，* 所以要考虑用kernel method来解决return和if的关系
+ 
+       ,*/
+
+  public static Sequence<Integer> smooth(Sequence<Integer> s1) {
+      assert s1 != null : "Violation of: s1 is not null";
+      assert s2 != null : "Violation of: s2 is not null";
+      assert s1.length() >= 1 : "|s1| >= 1";
+  
+      Sequence<Integer> s2 = s1.newInstance();
+      if (s1.length() > 1) {
+          int first = s1.remove(0);
+          int second = s1.remove(0);
+          s1.add(0,second);
+          // enter recursive
+          // use new s2 transferFrom the value from last recursive loop;
+          s2.transferFrom(smooth(s1));
+          // add calculate value into s2
+          s2.add(0, (int)( ((long) first + (long)second )/ 2 ));
+          // restore s1;
+          s1.add(0,first);
+      }
+      return s2;
+
+    }
+#+end_src 
+
+** value diagram 
+
+| step | s1         | s2          |
+|------+------------+-------------|
+|    0 | <7,23,2,6> | < 15,12,4 > |
+|    1 | <23,2,6>   | < 12,4 >    |
+|    2 | <2,6>      | < 4 >       |
+|    3 | < 6 >      | < >         |
+
+
+* Homework 4: Integer Average 
+
+[[http://web.cse.ohio-state.edu/software/2231/web-sw2/assignments/homeworks/integer-average.html][Link]]
+
+** Provide an argument justifying the following claim: The average (as defined here) of two Java ints i and j is representable as an int, regardless of the lower and upper bounds on the value of an int. 
+
+It's true, because the extreme situation, when we use the Integer.MAX_VALUE for both i and j, the correct answer should be the Integer.MAX_VALUE, in this case, the result of two input integer value would never over the maximum or lower than minimum integer value.  
+
+** 2 Implement the average method
+
+#+begin_src java -r -n
+  /**
+   ,* Returns the integer average of two given {@code int}s.
+   ,* 
+   ,* @param j
+   ,*            the first of two integers to average
+   ,* @param k
+   ,*            the second of two integers to average
+   ,* @return the integer average of j and k
+   ,* @ensures average = (j+k)/2
+   ,*/
+  public static int average(int j, int k) {
+      return (int)(( (long)(i) + (long)(j) ) /2 );
+  }
+#+end_src
+
+
+
+
+
+* Homework 5: Standard Java Lists
+
+[[http://web.cse.ohio-state.edu/software/2231/web-sw2/assignments/homeworks/java-util-list.html][Link]] 
+
+** Table
+|---+------------------------------------------------------+------------------|
+|   | Statements                                           | Variable Values  |
+|---+------------------------------------------------------+------------------|
+| / | <>                                                   | <>               |
+| # | List<Integer> list = new SomeListImplementation<>(); |                  |
+|---+------------------------------------------------------+------------------|
+| # |                                                      | list = <>;       |
+|---+------------------------------------------------------+------------------|
+| # | list.add(7);                                         |                  |
+|---+------------------------------------------------------+------------------|
+| # |                                                      | list = <7>;      |
+|---+------------------------------------------------------+------------------|
+| # | list.add(-12);                                       |                  |
+|---+------------------------------------------------------+------------------|
+| # |                                                      | list = <7,-12>;  |
+|---+------------------------------------------------------+------------------|
+| # | list.add(3);                                         |                  |
+|---+------------------------------------------------------+------------------|
+| # |                                                      | list = <7,-12,3> |
+|---+------------------------------------------------------+------------------|
+| # | int x = list.size();                                 |                  |
+|---+------------------------------------------------------+------------------|
+| # |                                                      | list = <7,-12,3> |
+| # |                                                      | x = 3            |
+|---+------------------------------------------------------+------------------|
+| # | x = list.remove(0);                                  |                  |
+|---+------------------------------------------------------+------------------|
+| # |                                                      | list = <-12,3>   |
+| # |                                                      | x = 7            |
+|---+------------------------------------------------------+------------------|
+| # | x = list.remove(1);                                  |                  |
+|---+------------------------------------------------------+------------------|
+| # |                                                      | list = <-12>     |
+| # |                                                      | x = 3            |
+|---+------------------------------------------------------+------------------|
+| # | x = list.size();                                     |                  |
+|---+------------------------------------------------------+------------------|
+| # |                                                      | list = <-12>     |
+| # |                                                      | x = 1            |
+|---+------------------------------------------------------+------------------|
+
+
+** You may have observed that the add(E e) and remove(int index) methods are marked as optional operations. Briefly discuss the benefits vs. pitfalls of this design decision. 
+
+- The benefits to have these optional operations is that the developer would have more flexibility and precise control over the element in the list.
+
+- The pitfalls is that some methods in the class may not well defined on a list with ineligible elements. 
+
+** Consider this quote from the java.util.List description, Briefly discuss the benefits vs. pitfalls of this design decision. 
+
+#+begin_QUOTE
+
+Some list implementations have restrictions on the elements that they may contain. For example, some implementations prohibit null elements, and some have restrictions on the types of their elements.
+
+#+end_QUOTE
+
+- With the restrictions, it will make sure that the methods in the interface would operate correctly with eligible element. 
+
+- However, user may not have precise control with the elements in the list.
+
+ 
+
+
+* Homework 6: Queue Implementation on Sequence
+
+[[http://web.cse.ohio-state.edu/software/2231/web-sw2/assignments/homeworks/queue-on-sequence/queue-on-sequence.html][Link]]
+
+#+begin_src java -r -n
+
+
+import components.queue.QueueSecondary;
+import components.sequence.Sequence;
+import components.sequence.Sequence1L;
+
+/**
+ * {@code Queue} represented as a {@code Sequence} of entries, with
+ * implementations of primary methods.
+ *
+ * @param <T>
+ *            type of {@code Queue} entries
+ * @correspondence this = $this.entries
+ */
+public class Queue3<T> extends QueueSecondary<T> {
+
+    /*
+     * Private members --------------------------------------------------------
+     */
+
+    /**
+     * Entries included in {@code this}.
+     */
+    private Sequence<T> entries;
+
+    /**
+     * Creator of initial representation.
+     */
+    private void createNewRep() {
+        this.entries = new Sequence1L<T>();
+    }
+
+    /*
+     * Constructors -----------------------------------------------------------
+     */
+
+    /**
+     * No-argument constructor.
+     */
+    public Queue3() {
+        this.createNewRep();
+    }
+
+    /*
+     * Standard methods removed to reduce clutter...
+     */
+
+    /*
+     * Kernel methods ---------------------------------------------------------
+     */
+
+    @Override
+    public final void enqueue(T x) {
+        assert x != null : "Violation of: x is not null";
+
+        // TODO - fill in body
+        this.entries.add(this.entries.length(), x);
+
+    }
+
+    @Override
+    public final T dequeue() {
+        assert this.length() > 0 : "Violation of: this /= <>";
+
+        // TODO - fill in body
+        T x = this.entries.remove(0);
+        // This line added just to make the component compilable.
+        return x;
+    }
+
+    @Override
+    public final int length() {
+
+        // TODO - fill in body
+        int x = this.entries.length();
+        // This line added just to make the component compilable.
+        return x;
+    }
+
+    /*
+     * Iterator removed to reduce clutter...
+     */
+    /**
+     * Reports the front of {@code this}.
+     * 
+     * @return the front entry of {@code this}
+     * @aliases reference returned by {@code front}
+     * @requires this /= <>
+     * @ensures <front> is prefix of this
+     */
+    @Override
+    public T front() {
+        assert this.length() > 0 : "Violation of: this /= <>";
+     
+        T x = this.entries.entry(0);
+        
+        return x;
+        
+     
+    }
+
+    
+}
+
+#+end_src
+
+
+* Homework 7: Sequence Implementation on Stack
+
+#+NAME:setLengthOfLeftStack
+#+begin_src java
+ /**
+     * Shifts entries between {@code leftStack} and {@code rightStack}, keeping
+     * reverse of the former concatenated with the latter fixed, and resulting
+     * in length of the former equal to {@code newLeftLength}.
+     *
+     * @param <T>
+     *            type of {@code Stack} entries
+     * @param leftStack
+     *            the left {@code Stack}
+     * @param rightStack
+     *            the right {@code Stack}
+     * @param newLeftLength
+     *            desired new length of {@code leftStack}
+     * @updates leftStack, rightStack
+     * @requires
+     *
+     *           <pre>
+     * 0 <= newLeftLength  and
+     * newLeftLength <= |leftStack| + |rightStack|
+     *           </pre>
+     *
+     * @ensures
+     *
+     *          <pre>
+     * rev(leftStack) * rightStack = rev(#leftStack) * #rightStack  and
+     * |leftStack| = newLeftLength}
+     *          </pre>
+     */
+    private static <T> void setLengthOfLeftStack(Stack<T> leftStack,
+            Stack<T> rightStack, int newLeftLength) {
+        assert leftStack != null : "Violation of: rightStack is not null";
+        assert leftStack != null : "Violation of: rightStack is not null";
+        assert 0 <= newLeftLength : "Violation of: 0 <= newLeftLength";
+        assert newLeftLength <= leftStack.length() + rightStack.length() : ""
+                + "Violation of: newLeftLength <= |leftStack| + |rightStack|";
+        int leftLength = leftStack.length();
+        if (leftLength > newLeftLength) {
+            leftStack.flip();
+            for (int i = 0; i < (leftLength - newLeftLength); i++) {
+                T digit = leftStack.pop();
+                rightStack.push(digit);
+            }
+            leftStack.flip();
+        }
+        if (leftLength < newLeftLength) {
+            leftStack.flip();
+            for (int i = 0; i < newLeftLength - leftLength; i++) {
+                T digit = rightStack.pop();
+                leftStack.push(digit);
+            }
+            leftStack.flip();
+        }
+
+    }
+
+#+end_src 
+
+#+NAME:Test case
+#+begin_src java
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
+import components.sequence.Sequence;
+
+/**
+ * JUnit test fixture for {@code Sequence<String>}'s constructor and kernel
+ * methods.
+ *
+ * @author Put your name here
+ *
+ */
+public abstract class SequenceTest {
+
+    /**
+     * Invokes the appropriate {@code Sequence} constructor for the
+     * implementation under test and returns the result.
+     *
+     * @return the new sequence
+     * @ensures constructorTest = <>
+     */
+    protected abstract Sequence<String> constructorTest();
+
+    /**
+     * Invokes the appropriate {@code Sequence} constructor for the reference
+     * implementation and returns the result.
+     *
+     * @return the new sequence
+     * @ensures constructorRef = <>
+     */
+    protected abstract Sequence<String> constructorRef();
+
+    /**
+     *
+     * Creates and returns a {@code Sequence<String>} of the implementation
+     * under test type with the given entries.
+     *
+     * @param args
+     *            the entries for the sequence
+     * @return the constructed sequence
+     * @ensures createFromArgsTest = [entries in args]
+     */
+    private Sequence<String> createFromArgsTest(String... args) {
+        Sequence<String> sequence = this.constructorTest();
+        for (String s : args) {
+            sequence.add(sequence.length(), s);
+        }
+        return sequence;
+    }
+
+    /**
+     *
+     * Creates and returns a {@code Sequence<String>} of the reference
+     * implementation type with the given entries.
+     *
+     * @param args
+     *            the entries for the sequence
+     * @return the constructed sequence
+     * @ensures createFromArgsRef = [entries in args]
+     */
+    private Sequence<String> createFromArgsRef(String... args) {
+        Sequence<String> sequence = this.constructorRef();
+        for (String s : args) {
+            sequence.add(sequence.length(), s);
+        }
+        return sequence;
+    }
+
+    // TODO - add test cases for constructor, add, remove, and length
+    /**
+     * test for add method.
+     */
+    @Test
+    public void testConstructor() {
+        Sequence<String> sequence = this.constructorTest();
+        Sequence<String> expected = this.constructorRef();
+        assertEquals(sequence, expected);
+
+    }
+
+    /**
+     * test for add.
+     */
+    @Test
+    public void testadd() {
+        Sequence<String> s = this.createFromArgsTest("a", "c");
+        Sequence<String> sExpected = this.createFromArgsRef("b", " a ", " c ");
+
+        s.add(0, " b ");
+
+        assertEquals(sExpected, s);
+    }
+
+    /**
+     * test for length empty.
+     */
+    @Test
+    public final void testLengthEmpty() {
+        /*
+         * Set up variables
+         */
+        Sequence<String> q = this.createFromArgsTest();
+        Sequence<String> qExpected = this.createFromArgsRef();
+        /*
+         * Call method under test
+         */
+        int i = q.length();
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertEquals(qExpected, q);
+        assertEquals(0, i);
+    }
+
+    /**
+     * test for length not empty.
+     */
+    @Test
+    public final void testLengthNonEmptyOne() {
+        /*
+         * Set up variables.
+         */
+        Sequence<String> q = this.createFromArgsTest("red");
+        Sequence<String> qExpected = this.createFromArgsRef("red");
+        /*
+         * Call method under test
+         */
+        int i = q.length();
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertEquals(qExpected, q);
+        assertEquals(1, i);
+    }
+
+    /**
+     * test for length more than one value.
+     */
+    @Test
+    public final void testLengthNonEmptyMoreThanOne() {
+        /*
+         * Set up variables
+         */
+        Sequence<String> q = this.createFromArgsTest("red", "green", "blue");
+        Sequence<String> qExpected = this.createFromArgsRef("red", "green",
+                "blue");
+        /*
+         * Call method under test
+         */
+        int i = q.length();
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertEquals(qExpected, q);
+        assertEquals(3, i);
+    }
+
+    /**
+     * test for remove.
+     *
+     */
+    @Test
+    public final void testRemove() {
+        Sequence<String> q = this.createFromArgsTest("red", "green", "blue");
+        Sequence<String> qExpected = this.createFromArgsRef("green", "blue");
+        String digit = q.remove(0);
+        assertEquals(qExpected, q);
+        assertEquals(digit, "red");
+    }
+
+}
+
+#+end_src
+
+
+* Homework 8: Set Implementation on Queue
+
+#+NAME:moveToFron
+#+begin_src java -r-n
+
+  /**
+     * Finds {@code x} in {@code q} and, if such exists, moves it to the front
+     * of {@code q}.
+     *
+     * @param <T>
+     *            type of {@code Queue} entries
+     * @param q
+     *            the {@code Queue} to be searched
+     * @param x
+     *            the entry to be searched for
+     * @updates q
+     * @ensures
+     *
+     *          <pre>
+     * perms(q, #q)  and
+     * if <x> is substring of q
+     *  then <x> is prefix of q
+     *          </pre>
+     */
+    private static <T> void moveToFront(Queue<T> q, T x) {
+        assert q != null : "Violation of: q is not null";
+
+        Queue<T> leftPart = q.newInstance();
+        Queue<T> rightPart = q.newInstance();
+
+        while (q.length() != 0) {
+            T digit = q.dequeue();
+            if (digit.equals(x)) {
+                leftPart.enqueue(digit);
+            } else {
+                rightPart.enqueue(digit);
+            }
+        }
+        leftPart.append(rightPart);
+        q.transferFrom(leftPart);
+    }
+
+
+#+end_src 
+
+
+#+NAME:TestCase
+#+begin_src java -r -n
+
+/**
+     * Test add.
+     */
+    @Test
+    public final void testAddNonEmpty1() {
+        /*
+         * ,* Set up variables ,
+         */
+        Set<String> s = this.createFromArgsTest("red", "blue");
+        Set<String> sExpected = this.createFromArgsRef("green", "red", "blue");
+        /*
+         * ,* Call method under test ,
+         */
+        s.add("green");
+        /*
+         * ,* Assert that values of variables match expectations ,
+         */
+        assertEquals(s, sExpected);
+    }
+
+    /**
+     * Test remove.
+     */
+    @Test
+    public final void testRemoveNonEmpty() {
+        /*
+         * ,* Set up variables ,
+         */
+        Set<String> s = this.createFromArgsTest("green", "red", "blue");
+        Set<String> sExpected = this.createFromArgsRef("red", "blue");
+        /*
+         * ,* Call method under test ,
+         */
+        s.remove("green");
+        /*
+         * ,* Assert that values of variables match expectations ,
+         */
+        assertEquals(s, sExpected);
+    }
+
+    /**
+     * Test removeAny.
+     */
+    @Test
+    public final void testRemoveAny() {
+        /*
+         * ,* Set up variables ,
+         */
+        Set<String> s = this.createFromArgsTest("green", "red", "blue");
+        Set<String> sExpected = this.createFromArgsRef("green", "red", "blue");
+        /*
+         * ,* Call method under test ,
+         */
+        String digit = s.removeAny();
+        assertTrue(
+                sExpected.contains(digit) && s.size() == sExpected.size() - 1);
+
+    }
+
+    /**
+     * Test Contains.
+     */
+    @Test
+    public final void testContains() {
+        /*
+         * ,* Set up variables ,
+         */
+        Set<String> s = this.createFromArgsTest("green", "red", "blue");
+        Set<String> sExpected = this.createFromArgsRef("green", "red", "blue");
+        /*
+         * ,* Call method under test ,
+         */
+        String digit = "red";
+        assertTrue(sExpected.contains(digit) && s.contains(digit));
+
+    }
+
+    /**
+     * Test Size.
+     */
+    @Test
+    public final void testSize() {
+        /*
+         * ,* Set up variables ,
+         */
+        Set<String> s = this.createFromArgsTest("green", "red", "blue");
+        Set<String> sExpected = this.createFromArgsRef("green", "red", "blue");
+        /*
+         * ,* Call method under test ,
+         */
+
+        int size1 = s.size();
+        int size2 = sExpected.size();
+        assertTrue(size1 == size2);
+    }
+}
+
+
+#+end_src
+
+
+* Homework 9: Map Implementation on Queue
+
+#+NAME: moveToFront
+#+begin_src java -r -n
+
+    /**
+     * Finds pair with first component {@code key} and, if such exists, moves it
+     * to the front of {@code q}.
+     *
+     * @param <K>
+     *            type of {@code Pair} key
+     * @param <V>
+     *            type of {@code Pair} value
+     * @param q
+     *            the {@code Queue} to be searched
+     * @param key
+     *            the key to be searched for
+     * @updates q
+     * @ensures
+     *
+     *          <pre>
+     * perms(q, #q)  and
+     * if there exists value: V (<(key, value)> is substring of q)
+     *  then there exists value: V (<(key, value)> is prefix of q)
+     *          </pre>
+     */
+    private static <K, V> void moveToFront(Queue<Pair<K, V>> q, K key) {
+        assert q != null : "Violation of: q is not null";
+        assert key != null : "Violation of: key is not null";
+
+        Queue<Pair<K, V>> newQueue = q.newInstance();
+
+        while (q.length() != 0 && !q.front().key().equals(key)) {
+            newQueue.enqueue(q.dequeue());
+        }
+        q.append(newQueue);
+
+    }
+#+end_src 
+
+#+NAME:Test Case
+#+begin_src java -r -n
+    /**
+     * test constructor.
+     */
+    @Test
+    public final void testConstructor() {
+        Map<String, String> s = this.constructorTest();
+        Map<String, String> sExpected = this.constructorRef();
+        assertEquals(s, sExpected);
+
+    }
+
+    /**
+     * Test for add non-Empty.
+     */
+    @Test
+    public final void testAddNonEmpty() {
+        Map<String, String> s = this.createFromArgsTest("red", "blue", "white",
+                "black");
+        Map<String, String> sExpected = this.createFromArgsRef("red", "blue",
+                "white", "black", "good", "bad");
+
+        s.add("good", "bad");
+        boolean result = false;
+        for (Pair<String, String> x : sExpected) {
+            if (s.hasKey(x.key()) && s.hasValue(x.value())
+                    && s.key(x.value()).equals(x.key())) {
+                result = true;
+            }
+        }
+
+        assertTrue(result);
+    }
+
+    /**
+     * Test for add Remove.
+     */
+    @Test
+    public final void testRemove() {
+        Map<String, String> s = this.createFromArgsTest("red", "blue", "white",
+                "black");
+        Map<String, String> sExpected = this.createFromArgsRef("white",
+                "black");
+
+        s.remove("red");
+        assertTrue(!s.hasKey("red") && s.equals(sExpected));
+
+    }
+
+    /**
+     * Test for Remove-any.
+     */
+    @Test
+    public final void testRemoveAny() {
+        Map<String, String> s = this.createFromArgsTest("red", "blue", "white",
+                "black");
+        int sizeBefore = s.size();
+        s.removeAny();
+        int sizeAfter = s.size();
+        assertTrue(sizeAfter == sizeBefore - 1);
+    }
+
+    /**
+     * Test for Value.
+     */
+    @Test
+    public final void testValue() {
+        Map<String, String> s = this.createFromArgsTest("red", "blue", "white",
+                "black");
+        String test = s.value("red");
+        String test2 = s.value("white");
+        assertTrue(test.equals("blue") && test2.equals("black"));
+    }
+
+    /**
+
+     * Test for Has-key.
+     */
+    @Test
+    public final void testHasKey() {
+        Map<String, String> s = this.createFromArgsTest("red", "blue", "white",
+                "black");
+        assertTrue(s.hasKey("red") && s.hasKey("white") && !s.hasKey("blue"));
+    }
+
+    /**
+     * Test for Size.
+     */
+    @Test
+    public final void testSize() {
+        Map<String, String> s = this.createFromArgsTest("red", "blue", "white",
+                "black", "good", "bad");
+        int sizeTest = s.size();
+        int sizeRef = 3;
+        assertEquals(sizeTest, sizeRef);
+    }
+#+end_src 
+
+
+* Homework 10: Hashing and Implementing Mod 
+
+#+NAME: mod
+#+begin_src java -r -n
+    /**
+     * Computes {@code a} mod {@code b} as % should have been defined to work.
+     *
+     * @param a
+     *            the number being reduced
+     * @param b
+     *            the modulus
+     * @return the result of a mod b, which satisfies 0 <= {@code mod} < b
+     * @requires b > 0
+     * @ensures
+     *
+     *          <pre>
+     * 0 <= mod  and  mod < b  and
+     * there exists k: integer (a = k * b + mod)
+     *          </pre>
+     */
+    public static int mod(int a, int b) {
+        assert b > 0 : "Violation of: b > 0";
+
+        int result = a % b;
+        if (a < 0 && result != 0) {
+            result = result + b;
+        }
+        return result;
+    }
+#+end_src 
+
+** 2 
+*** 1
+
+| Bucket | Integers Hashed |
+|     <> | <>              |
+|--------+-----------------|
+|      0 | <0,90>          |
+|      1 | < >             |
+|      2 | <432,-788>      |
+|      3 | < >             |
+|      4 | <54,84,-6>      |
+|      5 | <-195>          |
+|      6 | < >             |
+|      7 | <17 >           |
+|      8 | < >             |
+|      9 | <-101>          |
+
+*** 2 
+
+#+NAME: mod2
+#+begin_src java -r -n
+
+         public static int mod(int a, int b) {
+          assert b > 0 : "Violation of: b > 0";
+
+          if (a < 0) {
+              a = a * -1;
+          }
+          NaturalNumber number = new NaturalNumber1L(a);
+          int digit = 0;
+          int newNumber = 1;
+          while (!number.isZero()) {
+              digit = number.divideBy10();
+              newNumber = newNumber * digit;
+          }
+          int mod = newNumber % b;
+          return mod;
+      }
+#+end_src
+
+
+| Bucket | Integers Hashed |
+|     <> | <>              |
+|--------+-----------------|
+|      0 | <54,-101,90>    |
+|      1 | < 0>            |
+|      2 | <  84 >         |
+|      3 | < >             |
+|      4 | <432 >          |
+|      5 | <-196>          |
+|      6 | <-6>            |
+|      7 | <17 >           |
+|      8 | <-788>          |
+|      9 | < >             |
+
+
+
+
+
+
+* Homework 11: Hashing II 
+
+** Main method
+#+NAME: main method
+#+begin_src java -r -n
+
+    /**
+     * Main method.
+     *
+     * @param args
+     *            the command line arguments
+     */
+    public static void main(String[] args) {
+        SimpleReader in = new SimpleReader1L();
+        SimpleWriter out = new SimpleWriter1L();
+        /*
+         * Get hash table size and file name .
+         */
+        out.print("Hash table size: ");
+        int hashTableSize = in.nextInteger();
+        out.print("Text file name: ");
+        String textFileName = in.nextLine();
+        /*
+         * Set up counts and counted.
+         */
+        Array<Integer> counts = new Array1L<Integer>(hashTableSize);
+        for (int i = 0; i < hashTableSize; i++) {
+            counts.setEntry(i, 0);
+        }
+        Set<String> counted = new Set1L<String>();
+        /*
+         * Get some lines of input, hash them, and record counts.
+         */
+        SimpleReader textFile = new SimpleReader1L(textFileName);
+        while (!textFile.atEOS()) {
+            String line = textFile.nextLine();
+            if (!counted.contains(line)) {
+                int bucket = mod(hashCode(line), hashTableSize);
+                counts.setEntry(bucket, counts.entry(bucket) + 1);
+
+                counted.add(line);
+            }
+        }
+        textFile.close();
+        /*
+         * Report results.
+         */
+        out.println();
+        out.println("Bucket\tHits\tBar");
+        out.println("------\t----\t---");
+        for (int i = 0; i < counts.length(); i++) {
+            if (counts.mayBeExamined(i)) {
+                out.print(i + "\t" + counts.entry(i) + "\t");
+                for (int j = 0; j < counts.entry(i); j++) {
+                    out.print("*");
+                }
+            } else {
+                out.print(i + "\t" + 0 + "\t");
+            }
+            out.println();
+        }
+        out.println();
+        out.println("Total:\t" + counted.size());
+        in.close();
+        out.close();
+    }
+
+#+end_src
+
+** hashcode
+#+NAME: Hashcode
+#+begin_src java -r -n
+
+    @Override
+    public int hashCode() {
+        int length = this.rep.length();
+        int digitTotal = 0;
+        for (int i = 0; i < length; i++) {
+            if (!(this.rep.charAt(i) == '-')) {
+                digitTotal = digitTotal
+                        + Character.digit(this.rep.charAt(i), 36);
+            }
+        }
+        return digitTotal;
+    }
+
+#+end_src 
+
+** Q3
+
+- Explain exactly what problem this would cause; i.e., explain what problem would arise if "292-OHIO" and "292-6446" were both considered legal phone numbers and your hash function from the previous problem could be applied to both of them, and therefore you actually decided to use that hash function for both of them.
+
+  - The problem is that when we input 292-OHIO, the hashcode method we just implemented cannot return 6446. Because the hashCode method in the previous, we just sum all the digit in the phone number, while in this case we cannot get the same value with input "OHIO", since char 'o' = 10 'h' = 17 and 'i' = 18. 
+
+- Explain how you could change the hash function to correct this problem; i.e., explain what the hash function would have to do to handle phone numbers like "292-OHIO" and "292-6446" in a proper way.
+
+  - I found a pattern that when we divide by 4 for all the digit in int value, we could get 6446 for "OHIO". 
+
+#+NAME: Hashcode
+#+begin_src java -r -n
+
+    @Override
+    public int hashCode() {
+        int length = this.rep.length();
+        int digitTotal = 0;
+        for (int i = 0; i < length; i++) {
+            if (!(this.rep.charAt(i) == '-')) {
+                digitTotal = digitTotal
+                        + Character.digit(this.rep.charAt(i), 36) / 4 ;
+            }
+        }
+        return digitTotal;
+    }
+
+#+end_src 
+
+
+- While you're at it, you might as well also handle smoothly the case where the phone number is typed in as "292-ohio". Explain how you could further change the hash function to handle this situation, too.
+
+  - By use the method Character.digit(char ch , int radix), we can easily convert an char into int, in this case, this method doesn't being affect by upper or lower case of the letter, so it will get the same answer for the lower case of "ohio". 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+* Homework 12: BinaryTree and Recursion I
+
+#+NAME: size with recursion 
+#+begin_src java -r -n
+
+    /**
+     * Returns the size of the given {@code BinaryTree<T>}.
+     *
+     * @param <T>
+     *            the type of the {@code BinaryTree} node labels
+     * @param t
+     *            the {@code BinaryTree} whose size to return
+     * @return the size of the given {@code BinaryTree}
+     * @ensures size = |t|
+     */
+    public static <T> int size(BinaryTree<T> t) {
+        BinaryTree<T> left = t.newInstance();
+        BinaryTree<T> right = t.newInstance();
+        int size = 0;
+
+        if (t.height() != 0) {
+            T root = t.disassemble(left, right);
+            /* again what we gonna think in here is the left side of the tree return to me it's size and right side return to me it's size, so that I could get the total size by one line. 
+            */
+            size = 1 + size(left) + size(right);
+            t.assemble(root, left, right);
+        }
+        return size;
+
+    }
+
+#+end_src 
+
+#+NAME: size with iterator 
+#+begin_src java -r -n
+
+    /**
+     * Returns the size of the given {@code BinaryTree<T>}.
+     *
+     * @param <T>
+     *            the type of the {@code BinaryTree} node labels
+     * @param t
+     *            the {@code BinaryTree} whose size to return
+     * @return the size of the given {@code BinaryTree}
+     * @ensures size = |t|
+     */
+    public static <T> int size(BinaryTree<T> t) {
+        int size = 0;
+        for (T x : t){
+            size++;
+        }
+       
+        return size;
+
+    }
+
+#+end_src 
+
+
+
+
+
+
+
+
+* Homework 13: BinaryTree and Recursion II
+
+#+NAME: treeToString
+#+begin_src java -r -n
+
+    /**
+     * Returns the {@code String} prefix representation of the given
+     * {@code BinaryTree<T>}.
+     *
+     * @param <T>
+     *            the type of the {@code BinaryTree} node labels
+     * @param t
+     *            the {@code BinaryTree} to convert to a {@code String}
+     * @return the prefix representation of {@code t}
+     * @ensures treeToString = [the String prefix representation of t]
+     */
+    public static <T> String treeToString(BinaryTree<T> t) {
+        BinaryTree<T> left = t.newInstance();
+        BinaryTree<T> right = t.newInstance();
+        String line = "";
+
+        if (t.height() != 0) {
+            T root = t.disassemble(left, right);
+            line = root.toString() + '(' + treeToString(left)
+                    + treeToString(right) + ')';
+
+            t.assemble(root, left, right);
+        } else {
+            line = line + "()";
+        }
+        return line;
+    }
+
+#+end_src
+
+#+NAME: copy method
+#+begin_src java -r -n
+    /**
+     * Returns a copy of the the given {@code BinaryTree}.
+     *
+     * @param t
+     *            the {@code BinaryTree} to copy
+     * @return a copy of the given {@code BinaryTree}
+     * @ensures copy = t
+     */
+    public static BinaryTree<Integer> copy(BinaryTree<Integer> t) {
+        BinaryTree<Integer> left = t.newInstance();
+        BinaryTree<Integer> right = t.newInstance();
+        BinaryTree<Integer> copy = t.newInstance();
+        if (t.height() != 0) {
+            int root = t.disassemble(left, right);
+            copy.assemble(root, copy(left), copy(right));
+            t.assemble(root, left, right);
+        }
+        return copy;
+    }
+#+end_src 
+
+
+* Homework 14: Homework: Binary Search Trees
+
+#+NAME: isInTree
+#+begin_src java -r -n
+
+    /**
+     * Returns whether {@code x} is in {@code t}.
+     *
+     * @param <T>
+     *            type of {@code BinaryTree} labels
+     * @param t
+     *            the {@code BinaryTree} to be searched
+     * @param x
+     *            the label to be searched for
+     * @return true if t contains x, false otherwise
+     * @requires IS_BST(t)
+     * @ensures isInTree = (x is in labels(t))
+     */
+    public static <T extends Comparable<T>> boolean isInTree(BinaryTree<T> t,
+            T x) {
+        BinaryTree<T> left = t.newInstance();
+        BinaryTree<T> right = t.newInstance();
+        boolean result = false;
+        if (t.height() != 0) {
+            T root = t.disassemble(left, right);
+            int check = x.compareTo(root);
+            if (check > 0) {
+                isInTree(right, x);
+            } else if (check < 0) {
+                isInTree(left, x);
+            } else {
+                result = true;
+            }
+            t.assemble(root, left, right);
+
+        }
+
+        return result;
+
+    }
+
+#+end_src
+
+** 2
+
+
+* Homework 15: Insertion Sort
+
+#+begin_src java -r -n
+
+ /**
+     * Inserts the given {@code T} in the {@code Queue<T>} sorted according to
+     * the given {@code Comparator<T>} and maintains the {@code Queue<T>}
+     * sorted.
+     *
+     * @param <T>
+     *            type of {@code Queue} entries
+     * @param q
+     *            the {@code Queue} to insert into
+     * @param x
+     *            the {@code T} to insert
+     * @param order
+     *            the {@code Comparator} defining the order for {@code T}
+     * @updates q
+     * @requires
+     *
+     *           <pre>
+     * IS_TOTAL_PREORDER([relation computed by order.compare method])  and
+     * IS_SORTED(q, [relation computed by order.compare method])
+     *           </pre>
+     *
+     * @ensures
+     *
+     *          <pre>
+     * perms(q, #q * <x>)  and
+     * IS_SORTED(q, [relation computed by order.compare method])
+     *          </pre>
+     */
+    private static <T> void insertInOrder(Queue<T> q, T x,
+            Comparator<T> order) {
+        assert q != null : "Violation of: q is not null";
+        assert order != null : "Violation of: order is not null";
+        q.enqueue(x);
+        Queue<T> newQueue = q.newInstance();
+        while (q.length() != 0 && order.compare(x, q.front()) > 0) {
+            newQueue.enqueue(q.dequeue());
+        }
+        newQueue.enqueue(x);
+        newQueue.append(q);
+        q.transferFrom(newQueue);
+    }
+
+    @Override
+    public void sort(Comparator<T> order) {
+        assert order != null : "Violation of: order is not null";
+
+        // TODO - fill in body
+        Queue<T> newQueue = this.newInstance();
+        while (this.length() != 0) {
+            insertInOrder(newQueue, this.dequeue(), order);
+        }
+        this.transferFrom(newQueue);
+
+    }
+
+}
+#+end_src 
+
+
+* Homework 16 Quicksort
+
+- Zhenyu Liu
+- Session 12:40
+
+#+begin_src java -r -n 
+
+    /**
+     * Partitions {@code q} into two parts: entries no larger than
+     * {@code partitioner} are put in {@code front}, and the rest are put in
+     * {@code back}.
+     *
+     * @param <T>
+     *            type of {@code Queue} entries
+     * @param q
+     *            the {@code Queue} to be partitioned
+     * @param partitioner
+     *            the partitioning value
+     * @param front
+     *            upon return, the entries no larger than {@code partitioner}
+     * @param back
+     *            upon return, the entries larger than {@code partitioner}
+     * @param order
+     *            ordering by which to separate entries
+     * @clears q
+     * @replaces front, back
+     * @requires IS_TOTAL_PREORDER([relation computed by order.compare method])
+     * @ensures
+     *
+     *          <pre>
+     * perms(#q, front * back)  and
+     * for all x: T where (<x> is substring of front)
+     *  ([relation computed by order.compare method](x, partitioner))  and
+     * for all x: T where (<x> is substring of back)
+     *  (not [relation computed by order.compare method](x, partitioner))
+     *          </pre>
+     */
+    private static <T> void partition(Queue<T> q, T partitioner, Queue<T> front,
+            Queue<T> back, Comparator<T> order) {
+        assert q != null : "Violation of: q is not null";
+        assert partitioner != null : "Violation of: partitioner is not null";
+        assert front != null : "Violation of: front is not null";
+        assert back != null : "Violation of: back is not null";
+        assert order != null : "Violation of: order is not null";
+
+        // TODO - fill in body
+        while (q.length() != 0) {
+            T digit = q.dequeue();
+            if (order.compare(digit, partitioner) > 1) {
+                back.enqueue(digit);
+            } else {
+                front.enqueue(digit);
+            }
+        }
+    }
+
+    @Override
+    public void sort(Comparator<T> order) {
+        assert order != null : "Violation of: order is not null";
+        if (this.length() > 1) {
+
+            // TODO - fill in body
+            Queue<T> front = this.newInstance();
+            Queue<T> back = this.newInstance();
+            /*
+             * Dequeue the partitioning entry from this
+             */
+            T digit = this.dequeue();
+            /*
+             * Partition this into two queues as discussed above (you will need
+             * to declare and initialize two new queues)
+             */
+
+            /*
+             * Recursively sort the two queues
+             */
+            partition(this, digit, front, back, order);
+            front.sort(order);
+            back.sort(order);
+            /*
+             * Reconstruct this by combining the two sorted queues and the
+             * partitioning entry in the proper order
+             */
+            this.append(front);
+            this.enqueue(digit);
+            this.append(back);
+        }
+    }
+
+#+end_src
+
+
+* Homework 17 Heapsort
+
+- Zhenyu Liu 
+- Session: 12:40
+
+#+NAME:satisfiesHeapOrderin
+#+begin_src java -r -n
+
+    /**
+     * Checks if the given {@code BinaryTree<Integer>} satisfies the heap
+     * ordering property according to the <= relation.
+     *
+     * @param t
+     *            the binary tree
+     * @return true if the given tree satisfies the heap ordering property;
+     *         false otherwise
+     * @ensures
+     *
+     *          <pre>
+     * satisfiesHeapOrdering = [t satisfies the heap ordering property]
+     *          </pre>
+     */
+    private static boolean satisfiesHeapOrdering(BinaryTree<Integer> t) {
+        BinaryTree<Integer> left = t.newInstance();
+        BinaryTree<Integer> right = t.newInstance();
+        boolean result = true;
+        if (t.size() != 0) {
+            int root = t.disassemble(left, right);
+
+            if (root >= left.root() && root >= right.root()) {
+                result = false;
+            }
+            result = satisfiesHeapOrdering(left)
+                    && satisfiesHeapOrdering(right);
+            t.assemble(root, left, right);
+        }
+        return result;
+    }
+
+
+#+end_src 
+
+
+* Homework 18 Stack Implementation with Singly-Linked List
+
+- Zhenyu Liu 
+- Session: 12 : 40
+
+#+begin_src java -r -n
+
+ /**
+     * Creator of initial representation.
+     */
+    private void createNewRep() {
+
+        this.top = null;
+        this.length = 0;
+    }
+
+
+    /*
+     * Kernel methods ---------------------------------------------------------
+     */
+
+    @Override
+    public final void push(T x) {
+        assert x != null : "Violation of: x is not null";
+
+        // TODO - fill in body
+        Node enterDigit = new Node();
+        enterDigit.data = x;
+        enterDigit.next = this.top;
+        this.top = enterDigit;
+        this.length++;
+
+        assert this.conventionHolds();
+    }
+
+    @Override
+    public final T pop() {
+        assert this.length() > 0 : "Violation of: this /= <>";
+
+        // TODO - fill in body
+        T result = this.top.data;
+        this.top = this.top.next;
+
+        this.length--;
+
+        assert this.conventionHolds();
+        // Fix this line to return the result after checking the convention.
+        return result;
+    }
+
+    @Override
+    public final int length() {
+
+        // TODO - fill in body
+
+        assert this.conventionHolds();
+        // Fix this line to return the result after checking the convention.
+        return this.length;
+    }
+#+end_src 
+
+#+NAME:TestCase
+#+begin_src java -r -n
+
+  /*
+     * Constructor Test --------------------------------------------------
+     */
+
+    /**
+     * Tests Default Constructor.
+     */
+    @Test
+    public final void testDefaultConstructor() {
+        Stack<String> s = this.constructorTest();
+        Stack<String> sExpected = this.constructorRef();
+
+        assertEquals(sExpected, s);
+    }
+
+    /*
+     * Push Tests --------------------------------------------------
+     */
+
+    /**
+     * Tests Push.
+     */
+    @Test
+    public final void testPushFromEmpty() {
+        Stack<String> s = this.createFromArgsTest();
+        Stack<String> sExpected = this.createFromArgsRef("Hi");
+
+        s.push("Hi");
+
+        assertEquals(sExpected, s);
+    }
+
+    /**
+     * Tests Push-non empty.
+     */
+    @Test
+    public final void testPushFromNonEmpty() {
+        Stack<String> s = this.createFromArgsTest("Hello");
+        Stack<String> sExpected = this.createFromArgsRef("Hi", "Hello");
+
+        s.push("Hi");
+
+        assertEquals(sExpected, s);
+    }
+    /*
+     * Pop Tests --------------------------------------------------
+     */
+
+    /**
+     * Tests Pop.
+     */
+    @Test
+    public final void testPopToEmpty() {
+        Stack<String> s = this.createFromArgsTest("Hi");
+        Stack<String> sExpected = this.createFromArgsRef();
+
+        String ans = s.pop();
+
+        assertEquals(sExpected, s);
+        assertEquals("Hi", ans);
+    }
+
+    /**
+     * Tests Pop-non empty.
+     */
+    @Test
+    public final void testPopToNonEmpty() {
+        Stack<String> s = this.createFromArgsTest("Hi", "Hello");
+        Stack<String> sExpected = this.createFromArgsRef("Hello");
+
+        String ans = s.pop();
+
+        assertEquals(sExpected, s);
+        assertEquals("Hi", ans);
+    }
+    /*
+     * Length Tests --------------------------------------------------
+     */
+
+    /**
+     * Tests Length.
+     */
+    @Test
+    public final void testLength() {
+        Stack<String> s = this.createFromArgsTest("Hi");
+
+        int l = s.length();
+
+        assertEquals(1, l);
+    }
+
+
+#+end_src
+
+
+* Homework 19 List Implementation with Singly-Linked List and Two Smart Nodes
+
+- Zhenyu Liu 
+- Session  12 : 40
+
+#+begin_src java -r -n
+
+    /**
+     * Retreats the position in {@code this} by one.
+     *
+     * @updates this
+     * @requires this.left /= <>
+     * @ensures
+     *
+     *          <pre>
+     * this.left * this.right = #this.left * #this.right  and
+     * |this.left| = |#this.left| - 1
+     *          </pre>
+     */
+    @Override
+    public final void retreat() {
+        Node newLastNode = this.preFront;
+        while (newLastNode.next != this.lastLeft) {
+            newLastNode = newLastNode.next;
+        }
+        this.lastLeft = newLastNode;
+        this.leftLength--;
+        this.rightLength++;
+    }
+}
+
+#+end_src 
+
+
+* Homework 20 
+
+
+* Homework 21 Tree and Recursion
+
+- Zhenyu Liu
+- Session 12 : 40
+
+#+NAME: size in recursive
+#+begin_src java -r -n
+
+    /**
+     * Returns the size of the given {@code Tree<T>}.
+     *
+     * @param <T>
+     *            the type of the {@code Tree} node labels
+     * @param t
+     *            the {@code Tree} whose size to return
+     * @return the size of the given {@code Tree}
+     * @ensures size = |t|
+     */
+    public static <T> int size(Tree<T> t) {
+
+        Sequence<Tree<T>> subTree = t.newSequenceOfTree();
+        int size = 0;
+        if (t.height() != 0) {
+            T root = t.disassemble(subTree);
+            for (int i = 0; i < subTree.length(); i++) {
+                size = size + size(subTree.entry(i));
+            }
+            size++;
+            t.assemble(root, subTree);
+
+        }
+
+        return size;
+    }
+
+#+end_src 
+
+
+
+#+NAME: size in non_recursive
+#+begin_src java -r -n 
+
+/**
+ * Returns the size of the given {@code Tree<T>}.
+ * 
+ * @param <T>
+ *            the type of the {@code Tree} node labels
+ * @param t
+ *            the {@code Tree} whose size to return
+ * @return the size of the given {@code Tree}
+ * @ensures size = |t|
+ */
+public static <T> int size(Tree<T> t) {
+       int size = 0;
+        Iterator<T> iter = t.iterator();
+        while (iter.hasNext()) {
+            size++;
+        }
+
+        return size;
+}
+
+#+end_src 
+
+#+NAME: height
+#+begin_src java -r -n
+
+    /**
+     * Returns the height of the given {@code Tree<T>}.
+     *
+     * @param <T>
+     *            the type of the {@code Tree} node labels
+     * @param t
+     *            the {@code Tree} whose height to return
+     * @return the height of the given {@code Tree}
+     * @ensures height = ht(t)
+     */
+    public static <T> int height(Tree<T> t) {
+        Sequence<Tree<T>> children = new Sequence1L<Tree<T>>();
+        int height = 0;
+        int tempMaxHeight = 0;
+
+        if (t.size() > 0) {
+
+            T root = t.disassemble(children);
+
+            for (Tree<T> x : children) {
+                if (height(x) > tempMaxHeight) {
+                    tempMaxHeight = height(x);
+                }
+            }
+
+            height = 1 + tempMaxHeight;
+            t.assemble(root, children);
+        }
+        return height;
+
+    }
+
+#+end_src
+
+
+#+NAME: max 
+#+begin_src java -r -n
+
+    /**
+     * Returns the largest integer in the given {@code Tree<Integer>}.
+     *
+     * @param t
+     *            the {@code Tree<Integer>} whose largest integer to return
+     * @return the largest integer in the given {@code Tree<Integer>}
+     * @requires |t| > 0
+     * @ensures
+     * 
+     *          <pre>
+     * max is in labels(t)  and
+     * for all i: integer where (i is in labels(t)) (i <= max)
+     *          </pre>
+     */
+    public static int max(Tree<Integer> t) {
+        int max = 0;
+        Sequence<Tree<Integer>> children = new Sequence1L<Tree<Integer>>();
+        if (t.height() != 0) {
+            int root = t.disassemble(children);
+            for (int i = 0; i < children.length(); i++) {
+                max = max(children.entry(i));
+            }
+            if (root > max) {
+                max = root;
+            }
+            t.assemble(root, children);
+        }
+
+        return max;
+    }
+
+#+end_src 
+
+
+* Homework 22 Statement and Recursion I
+
+- Zhenyu Liu
+- Session: 12 : 40
+
+#+NAME: countOfPrimitiveCalls
+#+begin_src java -r -n 
+
+ /**
+     * Private constructor so this utility class cannot be instantiated.
+     */
+    private CountPrimitiveCalls() {
+    }
+
+    /**
+     * Reports the number of calls to primitive instructions (move, turnleft,
+     * turnright, infect, skip) in a given {@code Statement}.
+     *
+     * @param s
+     *            the {@code Statement}
+     * @return the number of calls to primitive instructions in {@code s}
+     * @ensures
+     *
+     *          <pre>
+     * countOfPrimitiveCalls =
+     *  [number of calls to primitive instructions in s]
+     *          </pre>
+     */
+    public static int countOfPrimitiveCalls(Statement s) {
+        int count = 0;
+        switch (s.kind()) {
+            case BLOCK: {
+                /*
+                 * Add up the number of calls to primitive instructions in each
+                 * nested statement in the BLOCK.
+                 */
+
+                // TODO - fill in case
+                int length = s.lengthOfBlock();
+                for (int i = 0; i < length; i++) {
+                    Statement subLable = s.removeFromBlock(i);
+                    count += countOfPrimitiveCalls(subLable);
+                    s.addToBlock(i, subLable);
+                }
+                break;
+            }
+            case IF: {
+                /*
+                 * Find the number of calls to primitive instructions in the
+                 * body of the IF.
+                 */
+
+                // TODO - fill in case
+                Statement subLable = s.newInstance();
+
+                Statement.Condition c = s.disassembleIf(subLable);
+                count = countOfPrimitiveCalls(subLable);
+                s.assembleIf(c, subLable);
+
+                break;
+            }
+            case IF_ELSE: {
+                /*
+                 * Add up the number of calls to primitive instructions in the
+                 * "then" and "else" bodies of the IF_ELSE.
+                 */
+
+                // TODO - fill in case
+                Statement subLabelIf = s.newInstance();
+                Statement subLabelElse = s.newInstance();
+
+                Statement.Condition c = s.disassembleIfElse(subLabelIf,
+                        subLabelElse);
+                count = countOfPrimitiveCalls(subLabelIf)
+                        + countOfPrimitiveCalls(subLabelElse);
+                s.assembleIfElse(c, subLabelIf, subLabelElse);
+                break;
+            }
+            case WHILE: {
+                /*
+                 * Find the number of calls to primitive instructions in the
+                 * body of the WHILE.
+                 */
+
+                // TODO - fill in case
+                Statement subLabel = s.newInstance();
+                Statement.Condition c = s.disassembleWhile(subLabel);
+
+                count = countOfPrimitiveCalls(subLabel);
+                s.assembleWhile(c, subLabel);
+
+                break;
+            }
+            case CALL: {
+                /*
+                 * This is a leaf: the count can only be 1 or 0. Determine
+                 * whether this is a call to a primitive instruction or not.
+                 */
+
+                // TODO - fill in case
+                String label = s.disassembleCall();
+                if (label.equals("turnright") || label.equals("move")
+                        || label.equals("infect") || label.equals("turnleft")
+                        || label.equals("skip")) {
+                    count++;
+                }
+                s.assembleCall(label);
+                break;
+            }
+            default: {
+                // this will never happen...can you explain why?
+                break;
+            }
+        }
+        return count;
+    }
+
+#+end_src 
+
+
+* Homework 23  Statement and Recursion II
+
+- Zhenyu Liu
+- Session 12 : 40
+
+#+NAME: simplifyIfEls
+#+begin_src java -r -n 
+
+   /**
+     * Refactors the given {@code Statement} so that every IF_ELSE statement
+     * with a negated condition (NEXT_IS_NOT_EMPTY, NEXT_IS_NOT_ENEMY,
+     * NEXT_IS_NOT_FRIEND, NEXT_IS_NOT_WALL) is replaced by an equivalent
+     * IF_ELSE with the opposite condition and the "then" and "else" BLOCKs
+     * switched. Every other statement is left unmodified.
+     *
+     * @param s
+     *            the {@code Statement}
+     * @updates s
+     * @ensures
+     *
+     *          <pre>
+     * s = [#s refactored so that IF_ELSE statements with "not"
+     *   conditions are simplified so the "not" is removed]
+     *          </pre>
+     */
+    public static void simplifyIfElse(Statement s) {
+        switch (s.kind()) {
+            case BLOCK: {
+
+                // TODO - fill in case
+                int length = s.lengthOfBlock();
+                for (int i = 0; i < length; i++) {
+                    Statement subLable = s.removeFromBlock(i);
+                    simplifyIfElse(subLable);
+                    s.addToBlock(i, subLable);
+                }
+
+                break;
+            }
+            case IF: {
+
+                // TODO - fill in case
+                Statement subLabel = s.newInstance();
+                Statement.Condition condition = s.disassembleIf(subLabel);
+                simplifyIfElse(subLabel);
+                s.assembleIf(condition, subLabel);
+
+                break;
+            }
+            case IF_ELSE: {
+
+                // TODO - fill in case
+                Statement subLabelIf = s.newInstance();
+                Statement subLabelElse = s.newInstance();
+                Statement.Condition condition = s.disassembleIfElse(subLabelIf,
+                        subLabelElse);
+                switch (condition.name()) {
+                    case "NEXT_IS_NOT_EMPTY": {
+                        condition = condition.NEXT_IS_EMPTY;
+                        simplifyIfElse(subLabelIf);
+                        simplifyIfElse(subLabelElse);
+                        s.assembleIfElse(condition, subLabelElse, subLabelIf);
+                        break;
+                    }
+                    case "NEXT_IS_NOT_ENEMY": {
+                        condition = condition.NEXT_IS_ENEMY;
+                        simplifyIfElse(subLabelIf);
+                        simplifyIfElse(subLabelElse);
+                        s.assembleIfElse(condition, subLabelElse, subLabelIf);
+                        break;
+
+                    }
+                    case "NEXT_IS_NOT_FRIEND": {
+                        condition = condition.NEXT_IS_FRIEND;
+                        simplifyIfElse(subLabelIf);
+                        simplifyIfElse(subLabelElse);
+                        s.assembleIfElse(condition, subLabelElse, subLabelIf);
+                        break;
+
+                    }
+                    case "NEXT_IS_NOT_WALL": {
+                        condition = condition.NEXT_IS_WALL;
+                        simplifyIfElse(subLabelIf);
+                        simplifyIfElse(subLabelElse);
+                        s.assembleIfElse(condition, subLabelElse, subLabelIf);
+                        break;
+
+                    }
+
+                }
+
+                break;
+            }
+            case WHILE: {
+
+                // TODO - fill in case
+                Statement subLabel = s.newInstance();
+                Statement.Condition condition = s.disassembleWhile(subLabel);
+                simplifyIfElse(subLabel);
+                s.assembleWhile(condition, subLabel);
+
+                break;
+            }
+            case CALL: {
+                // nothing to do here...can you explain why?
+                break;
+            }
+            default: {
+                // this will never happen...can you explain why?
+                break;
+            }
+        }
+
+    }
+
+#+end_src 
+
+
+* Homework 24 Statement and Recursion III
+
+- Zhenyu Liu
+  - Session 12:40
+#+NAME: prettyPrint
+#+begin_src java -r -n 
+
+ /**
+     * Pretty prints {@code this} to the given stream {@code out} {@code offset}
+     * spaces from the left margin using
+     * {@link components.program.Program#INDENT_SIZE Program.INDENT_SIZE} spaces
+     * for each indentation level.
+     *
+     * @param out
+     *            the output stream
+     * @param offset
+     *            the number of spaces to be placed before every nonempty line
+     *            of output; nonempty lines of output that are indented further
+     *            will, of course, continue with even more spaces
+     * @updates out.content
+     * @requires out.is_open and 0 <= offset
+     * @ensures
+     *
+     *          <pre>
+     * out.content =
+     *   #out.content * [this pretty printed offset spaces from the left margin
+     *                   using Program.INDENT_SIZE spaces for indentation]
+     *          </pre>
+     */
+    @Override
+    public void prettyPrint(SimpleWriter out, int offset) {
+        assert out != null : "Violation of: out is not null";
+        assert out.isOpen() : "Violation of: out.is_open";
+        assert offset >= 0 : "Violation of: 0 <= offset";
+
+        int indent = Program.INDENT_SIZE;
+        switch (this.kind()) {
+            case BLOCK: {
+
+                // TODO - fill in case
+                int length = this.lengthOfBlock();
+                for (int i = 0; i < length; i++) {
+                    Statement subTree = this.removeFromBlock(i);
+                    subTree.prettyPrint(out, offset);
+                    this.addToBlock(i, subTree);
+                }
+                break;
+            }
+            case IF: {
+
+                // TODO - fill in case
+                Statement subTree = this.newInstance();
+                Condition ifCondition = this.disassembleIf(subTree);
+                printSpaces(out, offset);
+
+                out.println("IF " + toStringCondition(ifCondition));
+                subTree.prettyPrint(out, offset + indent);
+
+                for (int i = 0; i < offset; i++) {
+                    out.print(" ");
+                }
+                out.println("END IF");
+                this.assembleIf(ifCondition, subTree);
+                break;
+            }
+            case IF_ELSE: {
+
+                // TODO - fill in case
+
+                Statement subTreeIf = this.newInstance();
+                Statement subTreeElse = this.newInstance();
+                Condition ifElseCondition = this.disassembleIfElse(subTreeIf,
+                        subTreeElse);
+                printSpaces(out, offset);
+                out.println(
+                        "IF " + toStringCondition(ifElseCondition) + " THEN");
+                subTreeIf.prettyPrint(out, offset + indent);
+
+                printSpaces(out, offset);
+                out.println("ELSE");
+                subTreeElse.prettyPrint(out, offset + indent);
+
+                printSpaces(out, offset);
+                out.println("END IF");
+                this.assembleIfElse(ifElseCondition, subTreeIf, subTreeElse);
+
+                break;
+            }
+            case WHILE: {
+
+                // TODO - fill in case
+
+                Statement subTree = this.newInstance();
+                Condition whileCondition = this.disassembleWhile(subTree);
+                printSpaces(out, offset);
+                out.println(
+                        "WHILE " + toStringCondition(whileCondition) + " DO");
+                subTree.prettyPrint(out, offset + indent);
+
+                printSpaces(out, offset);
+                out.println("END WHILE");
+                this.assembleWhile(whileCondition, subTree);
+
+                break;
+            }
+            case CALL: {
+
+                // TODO - fill in case
+
+                String call = this.disassembleCall();
+                printSpaces(out, offset);
+                out.println(call);
+                this.assembleCall(call);
+
+                break;
+            }
+            default: {
+                // this will never happen...
+                break;
+            }
+        }
+    }
+#+end_src
+
+
+* Homework 25 Program and Statement renameInstruction
+
+#+NAME:renameInstruction
+#+begin_src java -r -n
+
+    /**
+     * Refactors the given {@code Statement} by renaming every occurrence of
+     * instruction {@code oldName} to {@code newName}. Every other statement is
+     * left unmodified.
+     *
+     * @param s
+     *            the {@code Statement}
+     * @param oldName
+     *            the name of the instruction to be renamed
+     * @param newName
+     *            the new name of the renamed instruction
+     * @updates s
+     * @requires [newName is a valid IDENTIFIER]
+     * @ensures
+     *
+     *          <pre>
+     * s = [#s refactored so that every occurrence of instruction oldName
+     *   is replaced by newName]
+     *          </pre>
+     */
+    public static void renameInstruction(Statement s, String oldName,
+            String newName) {
+        switch (s.kind()) {
+            case BLOCK: {
+                int length = s.lengthOfBlock();
+                for (int i = 0; i < length; i++) {
+                    Statement subTree = s.removeFromBlock(i);
+                    renameInstruction(subTree, oldName, newName);
+                    s.addToBlock(i, subTree);
+                }
+                break;
+            }
+            case IF: {
+                Statement subTree = s.newInstance();
+                Condition ifCondition = s.disassembleIf(subTree);
+                renameInstruction(subTree, oldName, newName);
+                s.assembleIf(ifCondition, subTree);
+            }
+            case IF_ELSE: {
+               
+                Statement subTreeIf = s.newInstance();
+                Statement subTreeElse = s.newInstance();
+                Condition ifElseCondition = s.disassembleIfElse(subTreeIf,
+                        subTreeElse);
+                renameInstruction(subTreeIf, oldName, newName);
+                renameInstruction(subTreeElse, oldName, newName);
+                s.assembleIfElse(ifElseCondition, subTreeIf, subTreeElse);
+
+            }
+            case WHILE: {
+
+                Statement subTree = s.newInstance();
+                Condition whileCondition = s.disassembleWhile(subTree);
+                renameInstruction(subTree, oldName, newName);
+                s.assembleWhile(whileCondition, subTree);
+
+            }
+            case CALL: {
+                String call = s.disassembleCall();
+                if (call.equals(oldName)) {
+                    s.assembleCall(newName);
+                } else {
+                    s.assembleCall(call);
+                }
+            }
+            default:
+                break;
+        }
+
+    }
+
+    /**
+     * Refactors the given {@code Program} by renaming instruction
+     * {@code oldName}, and every call to it, to {@code newName}. Everything
+     * else is left unmodified.
+     *
+     * @param p
+     *            the {@code Program}
+     * @param oldName
+     *            the name of the instruction to be renamed
+     * @param newName
+     *            the new name of the renamed instruction
+     * @updates p
+     * @requires
+     *
+     *           <pre>
+     * oldName is in DOMAIN(p.context)  and
+     * [newName is a valid IDENTIFIER]  and
+     * newName is not in DOMAIN(p.context)
+     *           </pre>
+     *
+     * @ensures
+     *
+     *          <pre>
+     * p = [#p refactored so that instruction oldName and every call
+     *   to it are replaced by newName]
+     *          </pre>
+     */
+    public static void renameInstruction(Program p, String oldName,
+            String newName) {
+        Map<String, Statement> c = p.newContext();
+        Map<String, Statement> ctxt = p.replaceContext(c);
+        while (ctxt.size() > 0) {
+            Map.Pair<String, Statement> instr = ctxt.removeAny();
+            String key = instr.key();
+            if (instr.key().equals(oldName)) {
+                key = newName;
+            }
+            renameInstruction(instr.value(), oldName, newName);
+            c.add(key, instr.value());
+        }
+
+        p.replaceContext(c);
+        Statement b = p.newBody();
+        Statement pBody = p.replaceBody(b);
+        renameInstruction(pBody, oldName, newName);
+        p.replaceBody(pBody);
+
+    }
+
+#+end_src 
+
+
+* Homework 26 Tokenizer
+
+- Zhenyu Liu
+- 12 : 40
+
+#+NAME: Tokenizer
+#+begin_src java -r -n 
+
+/**
+     * Returns the first "word" (maximal length string of characters not in
+     * {@code SEPARATORS}) or "separator string" (maximal length string of
+     * characters in {@code SEPARATORS}) in the given {@code text} starting at
+     * the given {@code position}.
+     *
+     * @param text
+     *            the {@code String} from which to get the word or separator
+     *            string
+     * @param position
+     *            the starting index
+     * @return the first word or separator string found in {@code text} starting
+     *         at index {@code position}
+     * @requires 0 <= position < |text|
+     * @ensures
+     *
+     *          <pre>
+     * nextWordOrSeparator =
+     *   text[position, position + |nextWordOrSeparator|)  and
+     * if entries(text[position, position + 1)) intersection entries(SEPARATORS) = {}
+     * then
+     *   entries(nextWordOrSeparator) intersection entries(SEPARATORS) = {}  and
+     *   (position + |nextWordOrSeparator| = |text|  or
+     *    entries(text[position, position + |nextWordOrSeparator| + 1))
+     *      intersection entries(SEPARATORS) /= {})
+     * else
+     *   entries(nextWordOrSeparator) is subset of entries(SEPARATORS)  and
+     *   (position + |nextWordOrSeparator| = |text|  or
+     *    entries(text[position, position + |nextWordOrSeparator| + 1))
+     *      is not subset of entries(SEPARATORS))
+     *          </pre>
+     */
+    private static String nextWordOrSeparator(String text, int position) {
+        assert text != null : "Violation of: text is not null";
+        assert 0 <= position : "Violation of: 0 <= position";
+        assert position < text.length() : "Violation of: position < |text|";
+
+        // TODO - fill in body
+        Set<Character> strSet = new Set1L<Character>();
+
+        for (int i = 0; i < SEPARATORS.length(); i++) {
+            char c = SEPARATORS.charAt(i);
+            if (!strSet.contains(c)) {
+                strSet.add(c);
+            }
+        }
+        int endIndex = position;
+        boolean ifSep = strSet.contains(text.charAt(position));
+        while (endIndex < text.length()
+                && strSet.contains(text.charAt(endIndex)) == ifSep) {
+            endIndex++;
+        }
+
+        return text.substring(position, endIndex);
+
+    
+    }
+
+    /*
+     * Public members ---------------------------------------------------------
+     */
+
+    /**
+     * Token to mark the end of the input. This token cannot come from the input
+     * stream because it contains whitespace.
+     */
+    public static final String END_OF_INPUT = "### END OF INPUT ###";
+
+    /**
+     * Tokenizes the entire input getting rid of all whitespace separators and
+     * returning the non-separator tokens in a {@code Queue<String>}.
+     *
+     * @param in
+     *            the input stream
+     * @return the queue of tokens
+     * @requires in.is_open
+     * @ensures
+     *
+     *          <pre>
+     * tokens =
+     *   [the non-whitespace tokens in #in.content] * <END_OF_INPUT>  and
+     * in.content = <>
+     *          </pre>
+     */
+    public static Queue<String> tokens(SimpleReader in) {
+        assert in != null : "Violation of: in is not null";
+        assert in.isOpen() : "Violation of: in.is_open";
+
+        // TODO - fill in body
+
+        Set<Character> strSet = new Set1L<Character>();
+        for (int i = 0; i < SEPARATORS.length(); i++) {
+            char c = SEPARATORS.charAt(i);
+            if (!strSet.contains(c)) {
+                strSet.add(c);
+            }
+        }
+        Queue<String> queueOfTokens = new Queue1L<String>();
+        while (!in.atEOS()) {
+            int position = 0;
+            String line = in.nextLine();
+            while (position < line.length()) {
+                String token = nextWordOrSeparator(line, position);
+                if (!strSet.contains(line.charAt(position))) {
+                    queueOfTokens.enqueue(token);
+                }
+                position += token.length();
+            }
+        }
+        queueOfTokens.enqueue(END_OF_INPUT);
+
+        // This line added just to make the program compilable.
+        return queueOfTokens;
+    }
+
+#+end_src 
+
+
+* Homework 28 Evaluation of Arithmetic Expressions (Recursive Descent Parser)
+
+- Zhenyu Liu
+
+#+NAME:ExpressionEvaluator
+#+begin_src java -r -n 
+
+/**
+ * This program calculates the value of an expression consisting of numbers,
+ * arithmetic operators, and parentheses.
+ *
+ * @author Zhenyu Liu
+ *
+ */
+public final class ExpressionEvaluator {
+
+    /**
+     * Base used in number representation.
+     */
+    private static final int RADIX = 10;
+
+    /**
+     * Private constructor so this utility class cannot be instantiated.
+     */
+    private ExpressionEvaluator() {
+    }
+
+    /**
+     * Evaluates a digit and returns its value.
+     *
+     * @param source
+     *            the {@code StringBuilder} that starts with a digit
+     * @return value of the digit
+     * @updates source
+     * @requires 1 < |source| and [the first character of source is a digit]
+     * @ensures
+     *
+     *          <pre>
+     * valueOfDigit = [value of the digit at the start of #source]  and
+     * #source = [digit string at start of #source] * source
+     *          </pre>
+     */
+    private static int valueOfDigit(StringBuilder source) {
+        assert source != null : "Violation of: source is not null";
+
+        // TODO - fill in body
+        int number = Character.digit(source.charAt(0), RADIX);
+        source.deleteCharAt(0);
+
+        return number;
+    }
+
+    /**
+     * Evaluates a digit sequence and returns its value.
+     *
+     * @param source
+     *            the {@code StringBuilder} that starts with a digit-seq string
+     * @return value of the digit sequence
+     * @updates source
+     * @requires
+     *
+     *           <pre>
+     * [a digit-seq string is a proper prefix of source, which
+     * contains a character that is not a digit]
+     *           </pre>
+     *
+     * @ensures
+     *
+     *          <pre>
+     * valueOfDigitSeq =
+     *   [value of longest digit-seq string at start of #source]  and
+     * #source = [longest digit-seq string at start of #source] * source
+     *          </pre>
+     */
+    private static int valueOfDigitSeq(StringBuilder source) {
+        assert source != null : "Violation of: source is not null";
+
+        // TODO - fill in body
+        int digit = 0;
+        String number = "";
+        while (source.length() > 0 && Character.isDigit(source.charAt(0))) {
+            digit = valueOfDigit(source);
+            number += Integer.toString(digit);
+        }
+        digit = Integer.parseInt(number);
+        // This line added just to make the program compilable.
+        return digit;
+    }
+
+    /**
+     * Evaluates a factor and returns its value.
+     *
+     * @param source
+     *            the {@code StringBuilder} that starts with a factor string
+     * @return value of the factor
+     * @updates source
+     * @requires
+     *
+     *           <pre>
+     * [a factor string is a proper prefix of source, and the longest
+     * such, s, concatenated with the character following s, is not a prefix
+     * of any factor string]
+     *           </pre>
+     *
+     * @ensures
+     *
+     *          <pre>
+     * valueOfFactor =
+     *   [value of longest factor string at start of #source]  and
+     * #source = [longest factor string at start of #source] * source
+     *          </pre>
+     */
+    private static int valueOfFactor(StringBuilder source) {
+        assert source != null : "Violation of: source is not null";
+
+        // TODO - fill in body
+        int result = 0;
+        if (source.charAt(0) == '(') {
+            source.deleteCharAt(0);
+            result = valueOfExpr(source);
+            source.deleteCharAt(0);
+        } else {
+            result = valueOfDigitSeq(source);
+        }
+
+        return result;
+
+    }
+
+    /**
+     * Evaluates a term and returns its value.
+     *
+     * @param source
+     *            the {@code StringBuilder} that starts with a term string
+     * @return value of the term
+     * @updates source
+     * @requires
+     *
+     *           <pre>
+     * [a term string is a proper prefix of source, and the longest
+     * such, s, concatenated with the character following s, is not a prefix
+     * of any term string]
+     *           </pre>
+     *
+     * @ensures
+     *
+     *          <pre>
+     * valueOfTerm =
+     *   [value of longest term string at start of #source]  and
+     * #source = [longest term string at start of #source] * source
+     *          </pre>
+     */
+    private static int valueOfTerm(StringBuilder source) {
+        assert source != null : "Violation of: source is not null";
+
+        // TODO - fill in body
+        int result = valueOfFactor(source);
+        while (source.length() > 0
+                && (source.charAt(0) == '*' || source.charAt(0) == '/')) {
+            char operation = source.charAt(0);
+            source.deleteCharAt(0);
+            if (operation == '*') {
+                result *= valueOfFactor(source);
+            } else {
+                result /= valueOfFactor(source);
+            }
+        }
+        return result;
+
+        // This line added just to make the program compilable.
+
+    }
+
+    /**
+     * Evaluates an expression and returns its value.
+     *
+     * @param source
+     *            the {@code StringBuilder} that starts with an expr string
+     * @return value of the expression
+     * @updates source
+     * @requires
+     *
+     *           <pre>
+     * [an expr string is a proper prefix of source, and the longest
+     * such, s, concatenated with the character following s, is not a prefix
+     * of any expr string]
+     *           </pre>
+     *
+     * @ensures
+     *
+     *          <pre>
+     * valueOfExpr =
+     *   [value of longest expr string at start of #source]  and
+     * #source = [longest expr string at start of #source] * source
+     *          </pre>
+     */
+    public static int valueOfExpr(StringBuilder source) {
+        assert source != null : "Violation of: source is not null";
+
+        // TODO - fill in body
+        int result = valueOfTerm(source);
+        while (source.length() > 0
+                && (source.charAt(0) == '+' || source.charAt(0) == '-')) {
+            char operation = source.charAt(0);
+            source.deleteCharAt(0);
+            if (operation == '+') {
+                result += valueOfTerm(source);
+            } else {
+                result -= valueOfTerm(source);
+            }
+        }
+        // This line added just to make the program compilable.
+        return result;
+    }
+
+#+end_src 
+
+
+* Homework 29 Evaluation of Boolean Expressions (Recursive Descent Parser)
+
+- Zhenyu Liu
+
+#+NAME:valueOfBoolExpr
+#+begin_src java -r -n
+
+    /**
+     * Evaluates a Boolean expression and returns its value.
+     *
+     * @param tokens
+     *            the {@code Queue<String>} that starts with a bool-expr string
+     * @return value of the expression
+     * @updates tokens
+     * @requires [a bool-expr string is a prefix of tokens]
+     * @ensures
+     *
+     *          <pre>
+     * valueOfBoolExpr =
+     *   [value of longest bool-expr string at start of #tokens]  and
+     * #tokens = [longest bool-expr string at start of #tokens] * tokens
+     *          </pre>
+     */
+    public static boolean valueOfBoolExpr(Queue<String> tokens) {
+        assert tokens != null : "Violation of: tokens is not null";
+
+        // TODO - fill in body
+        boolean result = true;
+        while (tokens.length() != 0) {
+            switch (tokens.dequeue()) {
+                case "T": {
+                    result = true;
+                    break;
+                }
+                case "F": {
+                    result = false;
+                    break;
+                }
+                case "NOT": {
+                    result = !valueOfBoolExpr(tokens);
+                    break;
+                }
+                case "(": {
+                    result = valueOfBoolExpr(tokens);
+                    break;
+                }
+                case ")": {
+                    // result = valueOfBoolExpr(tokens);
+                    break;
+                }
+                case "AND": {
+                    result &= valueOfBoolExpr(tokens);
+                    break;
+                }
+                case "OR": {
+                    result |= valueOfBoolExpr(tokens);
+                    break;
+                }
+
+                default:
+                    break;
+            }
+        }
+
+        // This line added just to make the program compilable.
+        return result;
+    }
+
+#+end_src 
+
+
+* Homework 31 Statement and Recursion IV
+
+- Zhenyu Liu
+
+#+NAME: generateCodeForStatement
+#+BEGIN_src java -r -n 
+ /**
+     * Generates the sequence of virtual machine instructions ("byte codes")
+     * corresponding to {@code s} and appends it at the end of {@code cp}.
+     *
+     * @param s
+     *            the {@code Statement} for which to generate code
+     * @param context
+     *            the {@code Context} in which to find user defined instructions
+     * @param cp
+     *            the {@code Sequence} containing the generated code
+     * @updates cp
+     * @ensures
+     *
+     *          <pre>
+     * if [all instructions called in s are either primitive or
+     *     defined in context]  and
+     *    [context does not include any calling cycles, i.e., recursion] then
+     *  cp = #cp * s[the sequence of virtual machine "byte codes" corresponding to s]
+     * else
+     *  [reports an appropriate error message to the console and terminates client]
+     *          </pre>
+     */
+    private static void generateCodeForStatement(Statement s,
+            Map<String, Statement> context, Sequence<Integer> cp) {
+
+        final int dummy = 0;
+
+        switch (s.kind()) {
+            case BLOCK: {
+
+                // TODO - fill in case
+                Statement current = s.newInstance();
+                for (int index = 0; index < s.lengthOfBlock(); index++) {
+                    current = s.removeFromBlock(index);
+                    generateCodeForStatement(current, context, cp);
+                    s.addToBlock(index, current);
+                }
+
+                break;
+            }
+            case IF: {
+                Statement b = s.newInstance();
+                Condition c = s.disassembleIf(b);
+                cp.add(cp.length(), conditionalJump(c).byteCode());
+                int jump = cp.length();
+                cp.add(cp.length(), dummy);
+                generateCodeForStatement(b, context, cp);
+                cp.replaceEntry(jump, cp.length());
+                s.assembleIf(c, b);
+                break;
+            }
+            case IF_ELSE: {
+
+                // TODO - fill in case
+                Statement b1 = s.newInstance();
+                Statement b2 = s.newInstance();
+                Condition c = s.disassembleIfElse(b1, b2);
+                cp.add(cp.length(), conditionalJump(c).byteCode());
+                int condJump = cp.length();
+                cp.add(cp.length(), dummy);
+                generateCodeForStatement(b1, context, cp);
+                cp.add(cp.length(), Instruction.valueOf("JUMP").byteCode());
+                int jump = cp.length();
+                cp.add(cp.length(), dummy);
+                cp.replaceEntry(condJump, cp.length());
+                generateCodeForStatement(b2, context, cp);
+                cp.replaceEntry(jump, cp.length());
+                s.assembleIfElse(c, b1, b2);
+                break;
+            }
+            case WHILE: {
+
+                // TODO - fill in case
+                Statement b = s.newInstance();
+                Condition c = s.disassembleWhile(b);
+                int test = cp.length();
+                cp.add(cp.length(), conditionalJump(c).byteCode());
+                int jump = cp.length();
+                cp.add(cp.length(), dummy);
+                generateCodeForStatement(b, context, cp);
+                cp.add(cp.length(), Instruction.valueOf("JUMP").byteCode());
+                cp.add(cp.length(), test);
+                s.assembleWhile(c, b);
+                cp.replaceEntry(jump, cp.length());
+                break;
+            }
+            case CALL: {
+
+                // TODO - fill in case
+                String label = s.disassembleCall();
+                if (context.hasKey(label)) {
+                    generateCodeForStatement(context.value(label),
+                            context.newInstance(), cp);
+                } else {
+                    label = label.toUpperCase();
+                    cp.add(cp.length(), Instruction.valueOf(label).byteCode());
+                    label = label.toLowerCase();
+                }
+                s.assembleCall(label);
+                break;
+            }
+            default: {
+                // this will never happen...
+                break;
+            }
+        }
+    }
+
+
+#+end_src 
+
+
+* Homework 32 WaitingLine Family Interface Design
+
+- Zhenyu Liu
+
+#+NAME: WaitingLineKernel:
+#+BEGIN_src java -r -n
+
+/**
+ * First-in-first-out (FIFO) waiting line component with primary
+ * methods.
+ * 
+ * @param <T>
+ *            type of {@code WaitingLineKernel} entries
+ * @mathmodel type WaitingLineKernel is modeled by string of T
+ * @initially <pre>
+ * ():
+ *  ensures
+ *   this = <>
+ * </pre>
+ * @iterator ~this.seen * ~this.unseen = this
+ */
+public interface WaitingLineKernel<T> extends Standard<WaitingLine<T>>,
+        Iterable<T> {
+
+    /**
+     * Adds {@code x} to the end of {@code this} if {@code this} does not
+     * contain {@code x}.
+     * 
+     * @param x
+     *            the entry to be added
+     * @aliases reference {@code x}
+     * @updates {@code this}
+     * @requires <pre>
+     * {@code this does not contain x}
+     * @ensures
+     * {@code this = #this * <x>}
+     * </pre>
+     */
+    void addLine(T customer);
+
+    /**
+     * Removes {@code customer} from the front of {@code this}.
+     * 
+     * @return the entry removed
+     * @updates {@code this}
+     * @requires <pre>
+     * {@code this /= <>}
+     * </pre>
+     * @ensures <pre>
+     * {@code #this = <removeFrontFromLine> * this}
+     * </pre>
+     */
+    T removeFrontLine();
+
+    /**
+     * Reports the front of {@code this}.
+     * 
+     * @return the front entry of {@code this}
+     * @aliases reference returned by {@code front}
+     * @requires <pre>
+     * {@code this /= <>}
+     * </pre>
+     * @ensures <pre>
+     * {@code <front> is prefix of this}
+     * </pre>
+     */
+    T frontLine();
+
+    /**
+     * Reports length of {@code this}.
+     * 
+     * @return the length of {@code this}
+     * @ensures <pre>
+     * {@code length = |this|}
+     * </pre>
+     */
+    int lengthOfLine();
+
+}
+
+
+#+END_SRC
+
+#+NAME: WaitingLine
+#+BEGIN_SRC java -r -n
+
+/**
+ * {@code WaitingLineKernel} enhanced with secondary methods.
+ *
+ * @param <T>
+ *            type of {@code WaitingLine} entries
+ * @mathdefinitions <pre>
+ * IS_TOTAL_PREORDER (
+ *   r: binary relation on T
+ *  ) : boolean is
+ *  for all x, y, z: T
+ *   ((r(x, y) or r(y, x))  and
+ *    (if (r(x, y) and r(y, z)) then r(x, z)))
+ *
+ * IS_SORTED (
+ *   s: string of T,
+ *   r: binary relation on T
+ *  ) : boolean is
+ *  for all x, y: T where (<x, y> is substring of s) (r(x, y))
+ * </pre>
+ */
+public interface WaitingLine<T> extends WaitingLineKernel<T> {
+
+    /**
+     * Find the position of the {@code entry} in {@code this}
+     *
+     * @param entry
+     *            the entry being looked for
+     * @return the position of the {@code entry} in {@code this}
+     * @requires <pre>
+     * {@code  this /= <>}
+     * </pre>
+     * @ensures <pre> 
+     * {@code position = position of customer in this} 
+     * </pre>
+     */
+    int findThePosition(T entry);
+
+    /**
+     * Replaces the entry in {@code this} at position {@code pos} with {@code x}
+     * , and returns the old entry.
+     *
+     * @param pos
+     *            the position to replace
+     * @param x
+     *            the new entry at position {@code pos}
+     * @return the old entry at position {@code pos}
+     * @aliases reference {@code x}
+     * @updates this
+     * @clear x
+     * @requires <pre>
+     * {@code  this /= <>, 0 <= pos and pos < |this|}
+     * </pre>
+     * @ensures <pre>
+     * {@code this = #this[0, pos) * <x> * #this[pos+1, |#this|) and
+     * <replaceEntry> = #this[pos, pos+1)}
+     * </pre>
+     */
+    
+    T replaceEntry(int pos, T x);
+
+#+END_SRC
+
+
+* Homework 33 WaitingLine Family Class Implementation
+
+- Zhenyu Liu
+
+#+NAME:WaitingLingSecondary
+#+begin_src java -r -n
+
+    @Override
+    public final boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof Queue<?>)) {
+            return false;
+        }
+        Queue<?> q = (Queue<?>) obj;
+        if (this.lengthOfLine() != q.length()) {
+            return false;
+        }
+        Iterator<T> it1 = this.iterator();
+        Iterator<?> it2 = q.iterator();
+        while (it1.hasNext()) {
+            T x1 = it1.next();
+            Object x2 = it2.next();
+            if (!x1.equals(x2)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // CHECKSTYLE: ALLOW THIS METHOD TO BE OVERRIDDEN
+    @Override
+    public int hashCode() {
+        final int samples = 2;
+        final int a = 37;
+        final int b = 17;
+        int result = 0;
+        /*
+         * This code makes hashCode run in O(1) time. It works because of the
+         * iterator order string specification, which guarantees that the (at
+         * most) samples entries returned by the it.next() calls are the same
+         * when the two Queues are equal.
+         */
+        int n = 0;
+        Iterator<T> it = this.iterator();
+        while (n < samples && it.hasNext()) {
+            n++;
+            T x = it.next();
+            result = a * result + b * x.hashCode();
+        }
+        return result;
+    }
+
+    // CHECKSTYLE: ALLOW THIS METHOD TO BE OVERRIDDEN
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder("<");
+        Iterator<T> it = this.iterator();
+        while (it.hasNext()) {
+            result.append(it.next());
+            if (it.hasNext()) {
+                result.append(",");
+            }
+        }
+        result.append(">");
+        return result.toString();
+    }
+
+    /**
+     * Find the position of the {@code entry} in {@code this}
+     *
+     * @param entry
+     *            the entry being looked for
+     * @return the position of the {@code entry} in {@code this}
+     * @requires
+     *
+     *           <pre>
+     * {@code  this /= <>}
+     *           </pre>
+     *
+     * @ensures
+     *
+     *          <pre>
+     *
+     * {@code position = position of customer in this}
+     *          </pre>
+     */
+    @Override
+    public int findThePosition(T entry) {
+
+        int length = this.lengthOfLine();
+        int position = 0;
+        for (int i = 0; i < length; i++) {
+            if (this.frontLine().equals(entry)) {
+                position = i;
+            }
+            this.addLine(this.removeFrontLine());
+        }
+        return position;
+
+    }
+
+    /**
+     * Replaces the entry in {@code this} at position {@code pos} with {@code x}
+     * , and returns the old entry.
+     *
+     * @param pos
+     *            the position to replace
+     * @param x
+     *            the new entry at position {@code pos}
+     * @return the old entry at position {@code pos}
+     * @aliases reference {@code x}
+     * @updates this
+     * @clear x
+     * @requires
+     *
+     *           <pre>
+     * {@code  this /= <>, 0 <= pos and pos < |this|}
+     *           </pre>
+     *
+     * @ensures
+     *
+     *          <pre>
+     * {@code this = #this[0, pos) * <x> * #this[pos+1, |#this|) and
+     * <replaceEntry> = #this[pos, pos+1)}
+     *          </pre>
+     */
+
+    @Override
+    public T replaceEntry(int pos, T x) {
+        T removed = null;
+        int length = this.lengthOfLine();
+        for (int i = 0; i < length; i++) {
+            if (i == pos) {
+                removed = this.removeFrontLine();
+                this.addLine(x);
+            } else {
+                this.addLine(this.removeFrontLine());
+            }
+
+        }
+        return removed;
+
+    }
+
+#+end_src 
+
+
+
+* Homework 34 The Java Collections Framework I
+
+- Zhenyu Liu
+
+** Whimsical Toys Inc (WTI) needs to record the names of all its employees. Every month, an employee will be chosen at random from these records to receive a free toy.
+
+- Set, because we need a collection of names and should be no order.
+
+** WTI has decided that each new product will be named after an employee – but only first names will be used, and each name will be used only once. Prepare a list of unique first names.
+
+- Set, because the name only use once, which is also the feature of set.
+
+** WTI decides that it only wants to use the most popular names for its toys. Count the number of employees who have each first name.
+
+- Map, we can relate every names as key with times as value that the name shows up, so that we can get the most popular by compare the value between each key. 
+
+** WTI acquires season tickets for the local lacrosse team, to be shared by employees. Create a waiting list for this popular sport.
+
+- Queue, first in first out, keeps a order with people in wait list, also we could enqueue and dequeue to manipulate the values without distroy the order. 
+
+** For each of the four tasks above, specify which of the Java Collections Framework interfaces is best suited, and explain any differences in how you would use it compared to the OSU CSE component you chose to handle the task.
+
+- Set, no difference with OSU components
+- Sorted Set, it's better to have alphabetical order with name, so that we could search easily. 
+- SortedMap, the sorting is necessary when get the most popular first name. 
+- Queue, no difference with OSU components. 
+
+
+* Homework 35 The Java Collections Framework II
+
+- Zhenyu Liu 
+
+#+begin_src java -r -n
+
+ /**
+     * Raises the salary of all the employees in {@code map} whose name starts
+     * with the given {@code initial} by the given {@code raisePercent}.
+     *
+     * @param map
+     *            the name to salary map
+     * @param initial
+     *            the initial of names of employees to be given a raise
+     * @param raisePercent
+     *            the raise to be given as a percentage of the current salary
+     * @updates map
+     * @requires [the salaries in map are positive] and raisePercent > 0
+     * @ensures
+     * 
+     *          <pre>
+     * DOMAIN(map) = DOMAIN(#map)  and
+     * [the salaries of the employees in map whose names start with the given
+     *  initial have been increased by raisePercent percent (and truncated to
+     *  the nearest integer); all other employees have the same salary]
+     *          </pre>
+     */
+    public static void giveRaise(components.map.Map<String, Integer> map,
+            char initial, int raisePercent) {
+        assert map != null : "Violation of: map is not null";
+        assert raisePercent > 0 : "Violation of: raisePercent > 0";
+
+        // TODO - fill in body
+        Map<String, Integer> newMap = map.newInstance();
+        int size = map.size();
+        for (int i = 0; i < size; i++){
+            components.map.Map.Pair < String, Integer> temp = map.removeAny();
+            if (temp.key().charAt(0) == initial){
+                newMap.add(temp.key(),temp.value()*(raisePercent));
+            }else{
+                newMap.add(temp.key(),temp.value());
+            }
+        }
+        map.transferFrom(newMap);
+
+    }
+
+    /**
+     * Raises the salary of all the employees in {@code map} whose name starts
+     * with the given {@code initial} by the given {@code raisePercent}.
+     *
+     * @param map
+     *            the name to salary map
+     * @param initial
+     *            the initial of names of employees to be given a raise
+     * @param raisePercent
+     *            the raise to be given as a percentage of the current salary
+     * @updates map
+     * @requires [the salaries in map are positive] and raisePercent > 0
+     * @ensures
+     * 
+     *          <pre>
+     * DOMAIN(map) = DOMAIN(#map)  and
+     * [the salaries of the employees in map whose names start with the given
+     *  initial have been increased by raisePercent percent (and truncated to
+     *  the nearest integer); all other employees have the same salary]
+     *          </pre>
+     */
+    public static void giveRaise(java.util.Map<String, Integer> map,
+            char initial, int raisePercent) {
+        assert map != null : "Violation of: map is not null";
+        assert raisePercent > 0 : "Violation of: raisePercent > 0";
+
+        // TODO - fill in body
+        for (java.util.Map.Entry<String,Integer> x : map.entrySet()){
+            if (x.getKey().charAt(0) == initial){
+                x.setValue(x.getValue()*(initial));
+            }
+        }
+    }
+
+
+#+end_src 
+
+
+
+* Homework 36 Java File I/O 
+
+- Zhenyu Liu
+
+#+begin_src java -r -n
+
+/**
+     * Main method.
+     * 
+     * @param args
+     *            the command line arguments: input-file-name output-file-name
+     */
+    public static void main(String[] args) {
+
+        // TODO - fill in body
+        SimpleReader in=new SimpleReader1L(args[0]);
+        SimpleWriter out=new SimpleWriter1L(args[1]);
+        
+        while(!in.atEOS())
+        {
+            String temp=in.nextLine();
+            out.println();
+        }
+        
+        in.close();
+        out.close();
+    }
+
+
+#+end_src
+
+#+begin_src java -r -n
+
+/**
+     * Main method.
+     * 
+     * @param args
+     *            the command line arguments: input-file-name output-file-name
+     */
+    public static void main(String[] args) 
+            throws IOException{
+
+        // TODO - fill in body
+        BufferedReader input=new BufferedReader(new FileReader(args[0]));
+        PrintWriter output=new PrintWriter(new BufferedWriter(new FileWriter(args[1])));
+        
+        String s=input.readLine();
+        while(s!=null)
+        {
+            output.println(s);
+            s=input.readLine();
+        }
+        
+        input.close();
+        output.close();
+    }
+
+
+
+#+end_src
+
+#+begin_src java -r -n
+
+/**
+     * Main method.
+     *
+     * @param args
+     *            the command line arguments: input-file-name output-file-name
+     */
+    public static void main(String[] args) {
+
+        // TODO - fill in body
+        BufferedReader input;
+        PrintWriter output;
+        try {
+            input = new BufferedReader(new FileReader(args[0]));
+            output = new PrintWriter(
+                    new BufferedWriter(new FileWriter(args[1])));
+        } catch (IOException e) {
+            System.err.println("Error opening file");
+            return;
+        }
+
+        try {
+            String s = input.readLine();
+            while (s != null) {
+                output.println(s);
+                s = input.readLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading from file or writing to file");
+        }
+
+        try {
+            input.close();
+            output.close();
+        } catch (IOException e) {
+            System.err.println("Error closing file");
+        }
+    }
+
+
+#+
+
+
+* Homework 37 Java Class/Static Data Members – EmailAccount 
+
+- Zhenyu Liu
+
+#+begin_src java -r -n 
+
+import components.map.Map;
+import components.map.Map1L;
+
+/**
+ * Implementation of {@code EmailAccount}.
+ *
+ * @author Put your name here
+ *
+ */
+public final class EmailAccount1 implements EmailAccount {
+
+    /*
+     * Private members --------------------------------------------------------
+     */
+
+    // TODO - declare static and instance data members
+    String firstName;
+    String lastName;
+    String address;
+    static Map<String, Integer> map = new Map1L<>();
+
+    /*
+     * Constructor ------------------------------------------------------------
+     */
+
+    /**
+     * Constructor.
+     *
+     * @param firstName
+     *            the first name
+     * @param lastName
+     *            the last name
+     */
+    public EmailAccount1(String firstName, String lastName) {
+
+        // TODO - fill in body
+        this.firstName = firstName;
+        this.lastName = lastName;
+        if (map.hasKey(lastName.toLowerCase())) {
+            Integer n = map.value(lastName.toLowerCase());
+            n = n + 1;
+            this.address = lastName.toLowerCase() + "." + n + "@osu.edu";
+            map.replaceValue(lastName.toLowerCase(), n);
+        } else {
+            map.add(lastName.toLowerCase(), 1);
+            this.address = lastName.toLowerCase() + ".1@osu.edu";
+        }
+    }
+
+    /*
+     * Methods ----------------------------------------------------------------
+     */
+
+    @Override
+    public String name() {
+
+        // TODO - fill in body
+        String fullName = this.firstName + " " + this.lastName;
+        // Added to make skeleton compilable
+        return fullName;
+    }
+
+    @Override
+    public String emailAddress() {
+
+        return this.address;
+    }
+
+    @Override
+    public String toString() {
+
+        // TODO - fill in body
+        String str = "Name: " + this.firstName + " " + this.lastName
+                + ", Email: " + this.address;
+        // Added to make skeleton compilable
+        return str;
+    }
+
+}
+
+
+#+end_src
+
+
+
+* Review 
+
+// next word separator
+
+
+#+begin_src java
+
+public static String nextWordSeparator (String text, int position){
+
+       boolean isSep = Separators.indexOf(text.charAt(position)) >= 0;
+       int pos = position;
+       while (pos < text.length() && (Separators.indexOf(text.charAt(pos)) >= 0) == isSep){
+             pos++;
+             }
+             return text.subString(position ,pos);
+}
+
+#+end_src 
